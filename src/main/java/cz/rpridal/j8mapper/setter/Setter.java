@@ -1,4 +1,4 @@
-package cz.rpridal.j8mapper;
+package cz.rpridal.j8mapper.setter;
 
 import java.util.function.BiConsumer;
 
