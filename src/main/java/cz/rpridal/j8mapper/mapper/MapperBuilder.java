@@ -4,12 +4,8 @@ import java.beans.IntrospectionException;
 import java.beans.Introspector;
 import java.beans.PropertyDescriptor;
 import java.lang.reflect.Method;
-import java.util.Collections;
 import java.util.HashMap;
-import java.util.HashSet;
-import java.util.IdentityHashMap;
 import java.util.Map;
-import java.util.Set;
 
 import cz.rpridal.j8mapper.ClassDefinition;
 import cz.rpridal.j8mapper.SimpleMapperStorage;

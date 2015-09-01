@@ -42,4 +42,6 @@ public interface Mapper<S, T> {
 	
 	ClassDefinition<S, T> getClassDefinition();
 
+	T map(S source);
+
 }

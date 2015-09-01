@@ -1,11 +1,21 @@
 package cz.rpridal.j8mapper;
 
 import static org.junit.Assert.*;
+import static org.hamcrest.CoreMatchers.*;
+import static org.hamcrest.MatcherAssert.assertThat;
 
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
+import org.hamcrest.Description;
+import org.hamcrest.Matcher;
+import org.hamcrest.core.Is;
 import org.junit.Test;
 
 import cz.rpridal.j8mapper.domain.source.DepartmentS;
@@ -17,11 +27,13 @@ import cz.rpridal.j8mapper.domain.target.ManagerT;
 import cz.rpridal.j8mapper.mapper.Mapper;
 import cz.rpridal.j8mapper.mapper.MapperBuilder;
 
+@SuppressWarnings("unused")
 public class MapperBuilderTest {
 
-    class Source {
+    public class Source {
         String s;
         int i;
+        List<String> ls;
 
         public String getS() {
             return s;
@@ -38,11 +50,20 @@ public class MapperBuilderTest {
         public int getI() {
             return i;
         }
+        
+        public List<String> getLs() {
+			return ls;
+		}
+        
+        public void setLs(List<String> ls) {
+			this.ls = ls;
+		}
     }
     
-    class SameTarget {
+    public class SameTarget {
         String s;
         int i;
+        List<String> ls;
 
         public String getS() {
             return s;
@@ -59,11 +80,28 @@ public class MapperBuilderTest {
         public int getI() {
             return i;
         }
+        
+        public List<String> getLs() {
+			return ls;
+		}
+        
+        public void setLs(List<String> ls) {
+			this.ls = ls;
+		}
     }
 
-    class Target {
+    public class Target {
         String t;
-        int i;
+        Integer i;
+        List<String> ls;
+        
+        public List<String> getLs() {
+			return ls;
+		}
+        
+        public void setLs(List<String> ls) {
+			this.ls = ls;
+		}
 
         public String getT() {
             return t;
@@ -133,6 +171,24 @@ public class MapperBuilderTest {
         assertEquals("text", target.getS());
         assertEquals(55, target.getI());
     }
+    
+    @Test
+    public void automaticMappingSimpleObjectBuilderCollection() {
+        Source s = new Source();
+        s.setI(55);
+        s.setS("text");
+        s.setLs(Arrays.asList("S1", "S2"));
+        SameTarget target = MapperBuilder.start(Source.class, SameTarget.class)
+                .automatic()
+                .build()
+                .map(s, SameTarget::new);
+
+        assertEquals("text", target.getS());
+        assertEquals(55, target.getI());
+        assertTrue(contains(target.getLs(), a->a.equals("S1")));
+        assertTrue(contains(target.getLs(), a->a.equals("S2")));
+    }
+    
     @Test
     public void mappingSimpleObjectBuilder() {
         Source s = new Source();
@@ -364,6 +420,51 @@ public class MapperBuilderTest {
     	assertSame(result, result.getSubordinates().get(0).getManager());
     }
     
+    @Test
+    public void megaTest(){
+    	DepartmentS departmentS = getDepartment("name");
+    	ManagerS manager1 = getManagerS("manager1");
+    	manager1.setDepartment(departmentS);
+    	ManagerS manager2 = getManagerS("manager2");
+    	manager2.setDepartment(departmentS);
+    	EmployeeS emploeeS1 = getEmploeeS("employee1");
+    	emploeeS1.setDepartment(departmentS);
+    	EmployeeS emploeeS2 = getEmploeeS("employee2");
+    	emploeeS1.setDepartment(departmentS);
+    	EmployeeS emploeeS3 = getEmploeeS("employee3");
+    	emploeeS1.setDepartment(departmentS);
+    	manager1.setManager(manager2);
+    	manager2.setSubordinates(Arrays.asList(manager1, emploeeS1, emploeeS2, emploeeS3));
+    	manager2.setSubordinates(Arrays.asList(emploeeS1, emploeeS2, emploeeS3));
+    	departmentS.setEmployees(Arrays.asList(manager1, manager2, emploeeS1, emploeeS2, emploeeS3));
+    	DepartmentT departmentT = MapperBuilder.start(DepartmentS.class, DepartmentT.class)
+    		.automatic()
+    		.build()
+    		.map(departmentS);
+    	
+    	assertEquals(5, departmentT.getEmployees().size());
+    	contains(departmentT.getEmployees(), getNamePredicate("manager1"));
+    	contains(departmentT.getEmployees(), getNamePredicate("manager2"));
+    	contains(departmentT.getEmployees(), getNamePredicate("employee1"));
+    	contains(departmentT.getEmployees(), getNamePredicate("employee2"));
+    	contains(departmentT.getEmployees(), getNamePredicate("employee3"));
+    }
+    private Predicate<EmployeeT> getNamePredicate(String string) {
+		return e -> e.getName().equals(string);
+	}
+	private <T> boolean contains(Stream<T> stream, Predicate<? super T> predicate) {
+		return stream.filter(predicate).findFirst().isPresent();
+	}
+    
+    private <T> boolean contains(Collection<T> collection, Predicate<? super T> predicate) {
+    	return contains(collection.stream(), predicate);
+    }
+    
+	private DepartmentS getDepartment(String name) {
+		DepartmentS department = new DepartmentS();
+		department.setName(name);
+		return department;
+	}
 	private EmployeeS getEmploeeS(String name) {
 		EmployeeS employeeS1 = new EmployeeS();
     	employeeS1.setName(name);
@@ -371,6 +472,11 @@ public class MapperBuilderTest {
     	departmentS.setName("department");
     	employeeS1.setDepartment(departmentS);
 		return employeeS1;
+	}
+	private ManagerS getManagerS(String name) {
+		ManagerS managerS = new ManagerS();
+    	managerS.setName(name);
+		return managerS;
 	}
 
 }

@@ -22,6 +22,7 @@ public class MethodGetter<S, D> implements Getter<S, D> {
 			data = (D) method.invoke(source);
 		} catch (IllegalAccessException e) {
 			// TODO Auto-generated catch block
+			e.printStackTrace();
 		} catch (IllegalArgumentException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

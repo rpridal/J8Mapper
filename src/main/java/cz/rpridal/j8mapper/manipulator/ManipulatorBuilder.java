@@ -21,7 +21,9 @@ import cz.rpridal.j8mapper.mapper.Mapper;
 import cz.rpridal.j8mapper.mapper.MapperBuilder;
 import cz.rpridal.j8mapper.mapper.MapperStorage;
 import cz.rpridal.j8mapper.setter.MethodSetter;
+import cz.rpridal.j8mapper.transformer.IdentityTransformer;
 import cz.rpridal.j8mapper.transformer.MapperTransformer;
+import cz.rpridal.j8mapper.transformer.Transformer;
 
 public class ManipulatorBuilder<S, T> {
 
@@ -118,12 +120,19 @@ public class ManipulatorBuilder<S, T> {
 		return new CollectionManipulator<S, T, SDL, TDL, SD, TD>(
 				new MethodGetter<>(getter), 
 				new MethodSetter<>(setter), 
-				new MapperTransformer<>(
-						new ClassSupplier<>(listTargetClass), 
-						getMapper(listSourceClass, listTargetClass)
-				),
+				getTransformer(listSourceClass, listTargetClass),
 				supplier
 				);
+	}
+
+	private <SD, TD> Transformer<SD, TD> getTransformer(Class<SD> listSourceClass, Class<TD> listTargetClass) {
+		if(listSourceClass.equals(listTargetClass)){
+			return new IdentityTransformer<SD, TD>();
+		}
+		return new MapperTransformer<>(
+				new ClassSupplier<>(listTargetClass), 
+				getMapper(listSourceClass, listTargetClass)
+		);
 	}
 
 	private Class<?> getFirstGenericTypeFromMethod(Type genericReturnType) {

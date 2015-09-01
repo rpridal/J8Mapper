@@ -26,6 +26,9 @@ public class CollectionManipulator<S, T, SDL extends Collection<? extends SD>, T
 	@Override
 	public void map(S source, T target) {
 		SDL sdl = getter.get(source);
+		if(sdl == null){
+			return;
+		}
 		Stream<TD> map = sdl.stream().map(transformer::transform);
 		TDL collect = map.collect(Collectors.toCollection(supplier));
 		setter.set(target, collect);

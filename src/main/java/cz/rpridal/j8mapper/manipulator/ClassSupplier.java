@@ -16,11 +16,10 @@ public final class ClassSupplier<TD> implements Supplier<TD> {
 		try {
 			return clazz.newInstance();
 		} catch (InstantiationException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			throw new IllegalStateException(e);
 		} catch (IllegalAccessException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
+			throw new IllegalStateException(e);
 		}
 		return null;
 	}

@@ -5,6 +5,7 @@ import java.util.function.Supplier;
 import java.util.stream.Stream;
 
 import cz.rpridal.j8mapper.ClassDefinition;
+import cz.rpridal.j8mapper.manipulator.ClassSupplier;
 import cz.rpridal.j8mapper.manipulator.ObjectCache;
 
 public abstract class AbstractMapper<S, T> implements Mapper<S, T> {
@@ -44,6 +45,11 @@ public abstract class AbstractMapper<S, T> implements Mapper<S, T> {
 	@Override
 	public Stream<T> map(Stream<? extends S> source, Supplier<T> supplier) {
 		return source.map(s -> map(s, supplier.get()));
+	}
+	
+	@Override
+	public T map(S source) {
+		return map(source, new ClassSupplier<>(this.classDefinition.getTargetClass()));
 	}
 	
 	/* (non-Javadoc)
