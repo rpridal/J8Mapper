@@ -88,7 +88,7 @@ public class MapperBuilder<S, T> {
 	 *            - sets data to target object
 	 * @return instance of MapperBuilder itself
 	 */
-	public <D> MapperBuilder<S, T> addMapping(D data, Setter<T, D> setter) {
+	public <D> MapperBuilder<S, T> addStaticMapping(D data, Setter<T, D> setter) {
 		registerMapping(s -> data, setter);
 		return this;
 	}

@@ -227,7 +227,7 @@ public class MapperBuilderTest {
         s.setS("text");
         Target target = MapperBuilder.start(Source.class, Target.class)
                 .addMapping(Source::getS, Target::setT)
-                .addMapping(10, Target::setI)
+                .addStaticMapping(10, Target::setI)
                 .build()
                 .map(s, Target::new);
 
@@ -359,7 +359,7 @@ public class MapperBuilderTest {
     	
     	EmployeeT result = MapperBuilder.start(EmployeeS.class, EmployeeT.class)
     		.automatic()
-    		.addMapping("name2", EmployeeT::setName)
+    		.addStaticMapping("name2", EmployeeT::setName)
     		.build()
     		.map(employeeS, EmployeeT::new);
     	

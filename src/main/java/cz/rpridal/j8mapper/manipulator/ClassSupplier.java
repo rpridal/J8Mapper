@@ -21,6 +21,5 @@ public final class ClassSupplier<TD> implements Supplier<TD> {
 			e.printStackTrace();
 			throw new IllegalStateException(e);
 		}
-		return null;
 	}
 }

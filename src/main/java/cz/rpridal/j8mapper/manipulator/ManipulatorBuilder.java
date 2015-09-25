@@ -80,7 +80,6 @@ public class ManipulatorBuilder<S, T> {
 		return new ManipulatorBuilder<S, T>(source, target, storage);
 	}
 
-	@SuppressWarnings("unchecked")
 	public Manipulator<S, T> getManipulator(Method getter, Method setter) {
 		Methods methods = new Methods(getter, setter);
 		if(!manipulators.containsKey(methods)){
@@ -95,7 +94,6 @@ public class ManipulatorBuilder<S, T> {
 		
 	}
 	
-	@SuppressWarnings("unchecked")
 	public <SD, TD> Manipulator<S, T> createManipulator(Method getter, Method setter) {
 		Class<SD> sourceClass = (Class<SD>) getter.getReturnType();
 		Class<TD> targetClass = (Class<TD>) setter.getParameterTypes()[0];
