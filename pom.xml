@@ -3,4 +3,7 @@
   <groupId>cz.rpridal</groupId>
   <artifactId>j8mapper</artifactId>
   <version>0.0.1-SNAPSHOT</version>
+   <packaging>jar</packaging>
+
+  <name>j8mapper</name>
 </project>
