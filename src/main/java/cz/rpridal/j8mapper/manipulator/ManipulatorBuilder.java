@@ -21,6 +21,7 @@ import cz.rpridal.j8mapper.mapper.Mapper;
 import cz.rpridal.j8mapper.mapper.MapperBuilder;
 import cz.rpridal.j8mapper.mapper.MapperStorage;
 import cz.rpridal.j8mapper.setter.MethodSetter;
+import cz.rpridal.j8mapper.transformer.EnumTransformer;
 import cz.rpridal.j8mapper.transformer.IdentityTransformer;
 import cz.rpridal.j8mapper.transformer.MapperTransformer;
 import cz.rpridal.j8mapper.transformer.Transformer;
@@ -104,9 +105,18 @@ public class ManipulatorBuilder<S, T> {
 			return processCollection(getter, setter, ArrayList::new);
 		} else if (Set.class.isAssignableFrom(sourceClass) && Set.class.isAssignableFrom(targetClass)) {
 			return processCollection(getter, setter, HashSet::new);
-		} else {
+		} else if(Enum.class.isAssignableFrom(sourceClass) && Enum.class.isAssignableFrom(targetClass)) {
+			return processEnum(getter, setter, (Class<Enum>)sourceClass, (Class<Enum>)targetClass);
+		}else{
 			return getMapperManipulator(getter, setter, sourceClass, targetClass);
 		}
+	}
+
+	private <SD extends Enum<SD>, TD extends Enum<TD>> Manipulator<S, T> processEnum(Method getter, Method setter, Class<SD> sourceClass, Class<TD> targetClass) {
+		return new TransformerManipulator<S, T, SD, TD>(
+				new MethodGetter<>(getter), 
+				new MethodSetter<>(setter), 
+				new EnumTransformer<SD, TD>(sourceClass, targetClass));
 	}
 
 	@SuppressWarnings("unchecked")

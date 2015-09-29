@@ -21,9 +21,13 @@ import org.junit.Test;
 import cz.rpridal.j8mapper.domain.source.DepartmentS;
 import cz.rpridal.j8mapper.domain.source.EmployeeS;
 import cz.rpridal.j8mapper.domain.source.ManagerS;
+import cz.rpridal.j8mapper.domain.source.PersonS;
+import cz.rpridal.j8mapper.domain.source.SexS;
 import cz.rpridal.j8mapper.domain.target.DepartmentT;
 import cz.rpridal.j8mapper.domain.target.EmployeeT;
 import cz.rpridal.j8mapper.domain.target.ManagerT;
+import cz.rpridal.j8mapper.domain.target.PersonT;
+import cz.rpridal.j8mapper.domain.target.SexT;
 import cz.rpridal.j8mapper.mapper.Mapper;
 import cz.rpridal.j8mapper.mapper.MapperBuilder;
 
@@ -389,6 +393,20 @@ public class MapperBuilderTest {
     	assertNotNull(result.getSubordinates());
     	assertEquals(2, result.getSubordinates().size());
     	assertEquals("employee1", result.getSubordinates().get(0).getName());
+    }
+    
+    @Test
+    public void automaticMappingEnum() {
+    	PersonS person = new PersonS();
+    	person.setSex(SexS.FEMALE);
+    	
+    	Mapper<PersonS, PersonT> mapper = MapperBuilder.start(PersonS.class, PersonT.class)
+    			.automatic()
+    			.build();
+    	
+    	PersonT target = mapper.map(person);
+    	assertEquals(SexT.FEMALE, target.getSex());
+    	
     }
     
     @Test

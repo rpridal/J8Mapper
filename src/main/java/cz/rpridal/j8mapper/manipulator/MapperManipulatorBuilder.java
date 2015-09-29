@@ -25,7 +25,7 @@ public class MapperManipulatorBuilder<S, T> {
 		Mapper<SD, TD> mapper = storage.get(classDefinition);
 		if(mapper!= null){
 			Supplier<TD> supplier = new ClassSupplier<TD>(classDefinition.getTargetClass());
-			Manipulator<S, T> objectManipulator = new CompositeManipulator<S, T, SD, TD>(new MethodGetter<S, SD>(getter), new MethodSetter<>(setter), new MapperTransformer<>(supplier, mapper));
+			Manipulator<S, T> objectManipulator = new TransformerManipulator<S, T, SD, TD>(new MethodGetter<S, SD>(getter), new MethodSetter<>(setter), new MapperTransformer<>(supplier, mapper));
 			return objectManipulator;
 		}
 		return null;
