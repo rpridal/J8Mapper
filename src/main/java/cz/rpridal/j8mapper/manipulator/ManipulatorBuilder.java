@@ -101,9 +101,9 @@ public class ManipulatorBuilder<S, T> {
 		SimpleMethodManipulator<S, T> methodManipulator = new SimpleMethodManipulator<>(getter, setter);
 		if (methodManipulator.isApplicable()) {
 			return methodManipulator;
-		} else if (List.class.isAssignableFrom(sourceClass) && List.class.isAssignableFrom(targetClass)) {
+		} else if (Collection.class.isAssignableFrom(sourceClass) && List.class.isAssignableFrom(targetClass)) {
 			return processCollection(getter, setter, ArrayList::new);
-		} else if (Set.class.isAssignableFrom(sourceClass) && Set.class.isAssignableFrom(targetClass)) {
+		} else if (Collection.class.isAssignableFrom(sourceClass) && Set.class.isAssignableFrom(targetClass)) {
 			return processCollection(getter, setter, HashSet::new);
 		} else if(Enum.class.isAssignableFrom(sourceClass) && Enum.class.isAssignableFrom(targetClass)) {
 			return processEnum(getter, setter, (Class<Enum>)sourceClass, (Class<Enum>)targetClass);

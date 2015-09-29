@@ -7,8 +7,10 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Set;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -38,6 +40,7 @@ public class MapperBuilderTest {
         String s;
         int i;
         List<String> ls;
+        List<String> ss;
 
         public String getS() {
             return s;
@@ -54,6 +57,14 @@ public class MapperBuilderTest {
         public int getI() {
             return i;
         }
+        
+        public List<String> getSs() {
+			return ss;
+		}
+        
+        public void setSs(List<String> ss) {
+			this.ss = ss;
+		}
         
         public List<String> getLs() {
 			return ls;
@@ -68,7 +79,8 @@ public class MapperBuilderTest {
         String s;
         int i;
         List<String> ls;
-
+        Set<String> ss;
+        
         public String getS() {
             return s;
         }
@@ -91,6 +103,14 @@ public class MapperBuilderTest {
         
         public void setLs(List<String> ls) {
 			this.ls = ls;
+		}
+        
+        public void setSs(Set<String> ss) {
+			this.ss = ss;
+		}
+        
+        public Set<String> getSs() {
+			return ss;
 		}
     }
 
@@ -177,7 +197,7 @@ public class MapperBuilderTest {
     }
     
     @Test
-    public void automaticMappingSimpleObjectBuilderCollection() {
+    public void automaticMappingSimpleObjectBuilderList() {
         Source s = new Source();
         s.setI(55);
         s.setS("text");
@@ -191,6 +211,40 @@ public class MapperBuilderTest {
         assertEquals(55, target.getI());
         assertTrue(contains(target.getLs(), a->a.equals("S1")));
         assertTrue(contains(target.getLs(), a->a.equals("S2")));
+    }
+    
+    @Test
+    public void automaticMappingSimpleObjectBuilderSet() {
+        Source s = new Source();
+        s.setI(55);
+        s.setS("text");
+        s.setSs(Arrays.asList("S1", "S2"));
+        SameTarget target = MapperBuilder.start(Source.class, SameTarget.class)
+                .automatic()
+                .build()
+                .map(s, SameTarget::new);
+
+        assertEquals("text", target.getS());
+        assertEquals(55, target.getI());
+        assertTrue(contains(target.getSs(), a->a.equals("S1")));
+        assertTrue(contains(target.getSs(), a->a.equals("S2")));
+    }
+    
+    @Test
+    public void automaticMappingSimpleObjectBuilderSet2() {
+        SameTarget s = new SameTarget();
+        s.setI(55);
+        s.setS("text");
+        s.setSs(new HashSet<String>(Arrays.asList("S1", "S2")));
+        Source target = MapperBuilder.start(SameTarget.class, Source.class)
+                .automatic()
+                .build()
+                .map(s, Source::new);
+
+        assertEquals("text", target.getS());
+        assertEquals(55, target.getI());
+        assertTrue(contains(target.getSs(), a->a.equals("S1")));
+        assertTrue(contains(target.getSs(), a->a.equals("S2")));
     }
     
     @Test
