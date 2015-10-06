@@ -2,8 +2,11 @@ package cz.rpridal.j8mapper.setter;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class MethodSetter<T, D> implements Setter<T, D> {
+	private static final Logger LOGGER = Logger.getLogger(MethodSetter.class.getName());
 	private final Method method;
 
 	public MethodSetter(Method method) {
@@ -22,14 +25,14 @@ public class MethodSetter<T, D> implements Setter<T, D> {
 		try {
 			method.invoke(target, data);
 		} catch (IllegalAccessException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			// TODO Auto-generated catch block			
+			LOGGER.log(Level.FINE, "IllegalAccessException", e);
 		} catch (IllegalArgumentException e) {
 			// TODO Auto-generated catch block
-			e.printStackTrace();
+			LOGGER.log(Level.FINE, "IllegalArgumentException", e);
 		} catch (InvocationTargetException e) {
 			// TODO Auto-generated catch block
-			e.printStackTrace();
+			LOGGER.log(Level.FINE, "InvocationTargetException", e);
 		}
 	}
 }

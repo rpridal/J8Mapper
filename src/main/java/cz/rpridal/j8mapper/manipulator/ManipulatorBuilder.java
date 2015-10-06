@@ -122,9 +122,7 @@ public class ManipulatorBuilder<S, T> {
 	@SuppressWarnings("unchecked")
 	private <TD, SD, SDL extends Collection<SD>, TDL extends Collection<TD>> Manipulator<S, T> processCollection(Method getter, Method setter, Supplier<TDL> supplier) {
 		Class<SD> listSourceClass = (Class<SD>) getFirstGenericTypeFromMethod(getter.getGenericReturnType());
-		Class<TD> listTargetClass = (Class<TD>) getFirstGenericTypeFromMethod(setter.getGenericParameterTypes()[0]);
-		System.out.println(listSourceClass);
-		System.out.println(listTargetClass);
+		Class<TD> listTargetClass = (Class<TD>) getFirstGenericTypeFromMethod(setter.getGenericParameterTypes()[0]);		
 		return new CollectionManipulator<S, T, SDL, TDL, SD, TD>(
 				new MethodGetter<>(getter), 
 				new MethodSetter<>(setter), 
