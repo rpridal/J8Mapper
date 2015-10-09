@@ -3,6 +3,7 @@ package cz.rpridal.j8mapper.domain.target;
 public class PersonT {
 	private String name;
 	private SexT sex;
+	private Integer age;
 
 	public String getName() {
 		return name;
@@ -18,5 +19,13 @@ public class PersonT {
 
 	public void setSex(SexT sex) {
 		this.sex = sex;
+	}
+
+	public Integer getAge() {
+		return age;
+	}
+
+	public void setAge(Integer age) {
+		this.age = age;
 	}
 }

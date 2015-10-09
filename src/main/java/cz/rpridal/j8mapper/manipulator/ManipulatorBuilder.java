@@ -31,11 +31,13 @@ public class ManipulatorBuilder<S, T> {
 	private static class Methods {
 		private final Method getter;
 		private final Method setter;
+
 		public Methods(Method getter, Method setter) {
 			super();
 			this.getter = getter;
 			this.setter = setter;
 		}
+
 		@Override
 		public int hashCode() {
 			final int prime = 31;
@@ -44,6 +46,7 @@ public class ManipulatorBuilder<S, T> {
 			result = prime * result + ((setter == null) ? 0 : setter.hashCode());
 			return result;
 		}
+
 		@Override
 		public boolean equals(Object obj) {
 			if (this == obj)
@@ -66,13 +69,12 @@ public class ManipulatorBuilder<S, T> {
 			return true;
 		}
 	}
-	
+
 	private MapperManipulatorBuilder<S, T> objectManipulatorBuilder = new MapperManipulatorBuilder<>();
 	private final MapperStorage storage;
 	private static final Map<Methods, Manipulator<?, ?>> manipulators = Collections.synchronizedMap(new HashMap<>());
 	private static final Semaphore<Methods> semaphore = new Semaphore<>(3);
-	
-	
+
 	public ManipulatorBuilder(Class<S> source, Class<T> target, MapperStorage storage) {
 		this.storage = storage;
 	}
@@ -83,18 +85,21 @@ public class ManipulatorBuilder<S, T> {
 
 	public Manipulator<S, T> getManipulator(Method getter, Method setter) {
 		Methods methods = new Methods(getter, setter);
-		if(!manipulators.containsKey(methods)){
-			if(ManipulatorBuilder.semaphore.isLocked(methods)){
+		if (!manipulators.containsKey(methods)) {
+			if (ManipulatorBuilder.semaphore.isLocked(methods)) {
 				return new IdentityCacheManipulator<S, T>(getter, setter);
 			}
 			ManipulatorBuilder.semaphore.lock(methods);
-			manipulators.put(methods, createManipulator(getter, setter));
+			Manipulator<S, T> manipulator = createManipulator(getter, setter);
+			if(manipulator != null){
+				manipulators.put(methods, manipulator);
+			}
 			ManipulatorBuilder.semaphore.unlock(methods);
 		}
 		return ((Manipulator<S, T>) manipulators.get(methods));
-		
+
 	}
-	
+
 	public <SD, TD> Manipulator<S, T> createManipulator(Method getter, Method setter) {
 		Class<SD> sourceClass = (Class<SD>) getter.getReturnType();
 		Class<TD> targetClass = (Class<TD>) setter.getParameterTypes()[0];
@@ -105,40 +110,34 @@ public class ManipulatorBuilder<S, T> {
 			return processCollection(getter, setter, ArrayList::new);
 		} else if (Collection.class.isAssignableFrom(sourceClass) && Set.class.isAssignableFrom(targetClass)) {
 			return processCollection(getter, setter, HashSet::new);
-		} else if(Enum.class.isAssignableFrom(sourceClass) && Enum.class.isAssignableFrom(targetClass)) {
-			return processEnum(getter, setter, (Class<Enum>)sourceClass, (Class<Enum>)targetClass);
-		}else{
+		} else if (Enum.class.isAssignableFrom(sourceClass) && Enum.class.isAssignableFrom(targetClass)) {
+			return processEnum(getter, setter, (Class<Enum>) sourceClass, (Class<Enum>) targetClass);
+		} else {
 			return getMapperManipulator(getter, setter, sourceClass, targetClass);
 		}
 	}
 
-	private <SD extends Enum<SD>, TD extends Enum<TD>> Manipulator<S, T> processEnum(Method getter, Method setter, Class<SD> sourceClass, Class<TD> targetClass) {
-		return new TransformerManipulator<S, T, SD, TD>(
-				new MethodGetter<>(getter), 
-				new MethodSetter<>(setter), 
+	private <SD extends Enum<SD>, TD extends Enum<TD>> Manipulator<S, T> processEnum(Method getter, Method setter,
+			Class<SD> sourceClass, Class<TD> targetClass) {
+		return new TransformerManipulator<S, T, SD, TD>(new MethodGetter<>(getter), new MethodSetter<>(setter),
 				new EnumTransformer<SD, TD>(sourceClass, targetClass));
 	}
 
 	@SuppressWarnings("unchecked")
-	private <TD, SD, SDL extends Collection<SD>, TDL extends Collection<TD>> Manipulator<S, T> processCollection(Method getter, Method setter, Supplier<TDL> supplier) {
+	private <TD, SD, SDL extends Collection<SD>, TDL extends Collection<TD>> Manipulator<S, T> processCollection(
+			Method getter, Method setter, Supplier<TDL> supplier) {
 		Class<SD> listSourceClass = (Class<SD>) getFirstGenericTypeFromMethod(getter.getGenericReturnType());
-		Class<TD> listTargetClass = (Class<TD>) getFirstGenericTypeFromMethod(setter.getGenericParameterTypes()[0]);		
-		return new CollectionManipulator<S, T, SDL, TDL, SD, TD>(
-				new MethodGetter<>(getter), 
-				new MethodSetter<>(setter), 
-				getTransformer(listSourceClass, listTargetClass),
-				supplier
-				);
+		Class<TD> listTargetClass = (Class<TD>) getFirstGenericTypeFromMethod(setter.getGenericParameterTypes()[0]);
+		return new CollectionManipulator<S, T, SDL, TDL, SD, TD>(new MethodGetter<>(getter), new MethodSetter<>(setter),
+				getTransformer(listSourceClass, listTargetClass), supplier);
 	}
 
 	private <SD, TD> Transformer<SD, TD> getTransformer(Class<SD> listSourceClass, Class<TD> listTargetClass) {
-		if(listSourceClass.equals(listTargetClass)){
+		if (listSourceClass.equals(listTargetClass)) {
 			return new IdentityTransformer<SD, TD>();
 		}
-		return new MapperTransformer<>(
-				new ClassSupplier<>(listTargetClass), 
-				getMapper(listSourceClass, listTargetClass)
-		);
+		return new MapperTransformer<>(new ClassSupplier<>(listTargetClass),
+				getMapper(listSourceClass, listTargetClass));
 	}
 
 	private Class<?> getFirstGenericTypeFromMethod(Type genericReturnType) {

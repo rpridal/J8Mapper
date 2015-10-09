@@ -521,6 +521,21 @@ public class MapperBuilderTest {
     	contains(departmentT.getEmployees(), getNamePredicate("employee2"));
     	contains(departmentT.getEmployees(), getNamePredicate("employee3"));
     }
+    
+    @Test
+    public void autoboxingTest(){
+    	PersonS personS = new PersonS();
+    	personS.setAge(50);
+    	
+    	
+    	PersonT result = MapperBuilder.start(PersonS.class, PersonT.class)
+    		.automatic()
+    		.build()
+    		.map(personS);
+    	
+    	assertEquals(50, result.getAge().intValue());
+    }
+    
     private Predicate<EmployeeT> getNamePredicate(String string) {
 		return e -> e.getName().equals(string);
 	}
