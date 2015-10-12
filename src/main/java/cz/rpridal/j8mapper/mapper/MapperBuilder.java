@@ -10,9 +10,12 @@ import java.util.Map;
 import cz.rpridal.j8mapper.ClassDefinition;
 import cz.rpridal.j8mapper.SimpleMapperStorage;
 import cz.rpridal.j8mapper.getter.Getter;
+import cz.rpridal.j8mapper.manipulator.ClassSupplier;
 import cz.rpridal.j8mapper.manipulator.Manipulator;
 import cz.rpridal.j8mapper.manipulator.ManipulatorBuilder;
 import cz.rpridal.j8mapper.setter.Setter;
+import cz.rpridal.j8mapper.transformer.MapperTransformer;
+import cz.rpridal.j8mapper.transformer.Transformer;
 
 /**
  * Builder for mapper
@@ -79,6 +82,16 @@ public class MapperBuilder<S, T> {
 		return this;
 	}
 
+	public <SD, TD> MapperBuilder<S, T> addMapping(Getter<S, SD> getter, Setter<T, TD> setter, Transformer<SD, TD> transformer) {
+		registerMapping(getter, setter, transformer);
+		return this;
+	}
+	
+	public <SD, TD> MapperBuilder<S, T> addMapping(Getter<S, SD> getter, Setter<T, TD> setter, Mapper<SD, TD> mapper) {
+		registerMapping(getter, setter, new MapperTransformer<>(new ClassSupplier<TD>(mapper.getClassDefinition().getTargetClass()), mapper));
+		return this;
+	}
+
 	/**
 	 * Add static mapping for one field
 	 * 
@@ -92,6 +105,10 @@ public class MapperBuilder<S, T> {
 		registerMapping(s -> data, setter);
 		return this;
 	}
+	
+	
+	
+
 
 	public MapperBuilder<S, T> automatic() {
 		if(!this.storage.hasMapper(this.classDefinition)){
@@ -102,6 +119,10 @@ public class MapperBuilder<S, T> {
 		return this;
 	}
 
+	private <SD, TD> void registerMapping(Getter<S, SD> getter, Setter<T, TD> setter, Transformer<SD, TD> transformer) {
+		lambdaMapper.registerMapping(getter, setter, transformer);
+	}
+	
 	private <D> void registerMapping(Getter<S, D> getter, Setter<T, D> setter) {
 		lambdaMapper.registerMapping(getter, setter);
 	}

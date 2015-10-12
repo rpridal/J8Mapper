@@ -7,7 +7,9 @@ import cz.rpridal.j8mapper.ClassDefinition;
 import cz.rpridal.j8mapper.getter.Getter;
 import cz.rpridal.j8mapper.manipulator.IdentityManipulator;
 import cz.rpridal.j8mapper.manipulator.Manipulator;
+import cz.rpridal.j8mapper.manipulator.TransformerManipulator;
 import cz.rpridal.j8mapper.setter.Setter;
+import cz.rpridal.j8mapper.transformer.Transformer;
 
 /**
  * Mapper is responsible for mapping data from source object to target, it
@@ -31,6 +33,10 @@ public class LambdaMapper<S, T> extends AbstractMapper<S, T> {
 
 	public <D> void registerMapping(D data, Setter<T, D> setter) {
 		manipulators.add(new IdentityManipulator<S, T, D>(s -> data, setter));
+	}
+
+	public <SD, TD> void registerMapping(Getter<S, SD> getter, Setter<T, TD> setter, Transformer<SD, TD> transformer) {
+		manipulators.add(new TransformerManipulator<>(getter, setter, transformer));		
 	}
 
 	/**

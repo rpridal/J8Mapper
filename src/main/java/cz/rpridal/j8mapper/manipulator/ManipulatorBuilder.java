@@ -15,7 +15,6 @@ import java.util.function.Supplier;
 
 import cz.rpridal.j8mapper.ClassDefinition;
 import cz.rpridal.j8mapper.Semaphore;
-import cz.rpridal.j8mapper.SimpleMethodManipulator;
 import cz.rpridal.j8mapper.getter.MethodGetter;
 import cz.rpridal.j8mapper.mapper.Mapper;
 import cz.rpridal.j8mapper.mapper.MapperBuilder;
