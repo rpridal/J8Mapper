@@ -356,6 +356,19 @@ public class MapperBuilderTest {
 		assertEquals("p2", mapList.get(1).getT());
 		assertEquals(2, mapList.get(1).getI());
 	}
+	
+	@Test
+	public void mappingListObjectsNull() {
+		List<Source> source = null;
+
+		List<Target> mapList = MapperBuilder.start(Source.class, Target.class).addMapping(Source::getS, Target::setT)
+				.addMapping(Source::getI, Target::setI)
+				.build()
+				.map(source, Target::new)
+				.collect(Collectors.toList());
+
+		assertTrue(mapList.isEmpty());
+	}
 
 	@Test
 	public void automaticMappingManualySubMappingOneToOne() {

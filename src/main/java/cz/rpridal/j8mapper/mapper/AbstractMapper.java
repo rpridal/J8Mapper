@@ -40,7 +40,7 @@ public abstract class AbstractMapper<S, T> implements Mapper<S, T> {
 	@Override
 	public Stream<T> map(Collection<? extends S> source, Supplier<T> supplier) {
 		if(source == null){
-			return null;
+			return Stream.empty();
 		}
 		return map(source.stream(), supplier);
 	}
@@ -51,7 +51,7 @@ public abstract class AbstractMapper<S, T> implements Mapper<S, T> {
 	@Override
 	public Stream<T> map(Stream<? extends S> source, Supplier<T> supplier) {
 		if(source == null){
-			return null;
+			return Stream.empty();
 		}
 		return source.map(s -> map(s, supplier.get()));
 	}

@@ -69,7 +69,7 @@ public class MapperBuilder<S, T> {
 	}
 
 	/**
-	 * Add mapping for one field
+	 * Add mapping for one field input to setter and output from getter is same
 	 * 
 	 * @param getter
 	 *            - gets data from source object
@@ -82,11 +82,35 @@ public class MapperBuilder<S, T> {
 		return this;
 	}
 
+	/**
+	 * Add mapping for one field input to {@link Setter} and output from {@link Getter} is not same
+	 * to conversion there is {@link Transformer}
+	 * 
+	 * @param getter
+	 *            - gets data from source object
+	 * @param setter
+	 *            - sets data to target object
+	 * @param transformer
+	 * 			  - transform data from output of getter to input of setter
+	 * @return instance of mapperbuilder itself
+	 */
 	public <SD, TD> MapperBuilder<S, T> addMapping(Getter<S, SD> getter, Setter<T, TD> setter, Transformer<SD, TD> transformer) {
 		registerMapping(getter, setter, transformer);
 		return this;
 	}
 	
+	/**
+	 * Add mapping for one field input to {@link Setter} and output from {@link Getter} is not same
+	 * to conversion there is {@link Mapper}
+	 * 
+	 * @param getter
+	 *            - gets data from source object
+	 * @param setter
+	 *            - sets data to target object
+	 * @param mapper
+	 * 			  - transform data from output of getter to input of setter
+	 * @return instance of mapperbuilder itself
+	 */
 	public <SD, TD> MapperBuilder<S, T> addMapping(Getter<S, SD> getter, Setter<T, TD> setter, Mapper<SD, TD> mapper) {
 		registerMapping(getter, setter, new MapperTransformer<>(new ClassSupplier<TD>(mapper.getClassDefinition().getTargetClass()), mapper));
 		return this;
