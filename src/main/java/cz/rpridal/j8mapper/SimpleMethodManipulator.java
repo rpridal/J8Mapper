@@ -77,12 +77,20 @@ public class SimpleMethodManipulator<S, T> implements Manipulator<S, T> {
 	}
 
 	protected static <S, T> boolean isRelated(Class<S> class1, Class<T> class2) {
-		boolean result = primitivesToBoxed.get(class1).equals(class2);
-		if(result){
-			return true;
-		} else {
-			return primitivesToBoxed.get(class2).equals(class1);
+		Class<?> primitiveClass1 = primitivesToBoxed.get(class1);
+		Class<?> primitiveClass2 = primitivesToBoxed.get(class2);
+		Class<?> primitiveClass = null;
+		Class<?> clazz = null;
+		if(primitiveClass1 != null){
+			primitiveClass = primitiveClass1;
+			clazz = class2;
+		}else if(primitiveClass2 != null){
+			primitiveClass = primitiveClass2;
+			clazz = class1;
+		}else{
+			return false;
 		}
+		return primitiveClass.equals(clazz);
 	}	
 
 }
