@@ -197,6 +197,17 @@ public class MapperBuilderTest {
     }
     
     @Test
+    public void automaticMappingSimpleObjectBuilderNull() {
+        Source s = null;
+        SameTarget target = MapperBuilder.start(Source.class, SameTarget.class)
+                .automatic()
+                .build()
+                .map(s, SameTarget::new);
+
+        assertNull(target);
+    }
+    
+    @Test
     public void automaticMappingSimpleObjectBuilderList() {
         Source s = new Source();
         s.setI(55);

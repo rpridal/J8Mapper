@@ -43,6 +43,9 @@ public class LambdaMapper<S, T> extends AbstractMapper<S, T> {
 	 * @return target object - the same instance as parameter
 	 */
 	public T map(S source, T target) {
+		if(source == null){
+			return null;
+		}
 		manipulators.stream().forEach(m -> m.map(source, target));
 		return target;
 	}

@@ -22,6 +22,9 @@ public class MethodMapper<S, T> extends LambdaMapper<S, T> {
 	
 	@Override
 	public Stream<T> map(Collection<? extends S> source, Supplier<T> supplier) {
+		if(source == null){
+			return null;
+		}
 		return super.map(source, supplier);
 	}
 

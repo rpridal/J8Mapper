@@ -21,6 +21,9 @@ public class CompositeMapper<S, T> extends AbstractMapper<S, T> {
 	
 	@Override
 	public T map(S source, T target) {
+		if(source == null){
+			return null;
+		}
 		mappers.stream().forEach(m -> m.map(source, target));
 		return target;
 	}

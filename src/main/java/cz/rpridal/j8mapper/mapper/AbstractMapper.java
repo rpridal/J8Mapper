@@ -26,6 +26,9 @@ public abstract class AbstractMapper<S, T> implements Mapper<S, T> {
 	 */
 	@Override
 	public T map(S source, Supplier<T> supplier) {
+		if(source == null){
+			return null;
+		}
 		T target = supplier.get();
 		ObjectCache.saveObjects(source, target);
 		return map(source, target);
@@ -36,6 +39,9 @@ public abstract class AbstractMapper<S, T> implements Mapper<S, T> {
 	 */
 	@Override
 	public Stream<T> map(Collection<? extends S> source, Supplier<T> supplier) {
+		if(source == null){
+			return null;
+		}
 		return map(source.stream(), supplier);
 	}
 
@@ -44,11 +50,17 @@ public abstract class AbstractMapper<S, T> implements Mapper<S, T> {
 	 */
 	@Override
 	public Stream<T> map(Stream<? extends S> source, Supplier<T> supplier) {
+		if(source == null){
+			return null;
+		}
 		return source.map(s -> map(s, supplier.get()));
 	}
 	
 	@Override
 	public T map(S source) {
+		if(source == null){
+			return null;
+		}
 		return map(source, new ClassSupplier<>(this.classDefinition.getTargetClass()));
 	}
 	
