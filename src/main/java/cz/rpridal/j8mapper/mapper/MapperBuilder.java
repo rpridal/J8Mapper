@@ -52,6 +52,10 @@ public class MapperBuilder<S, T> {
 	public static <S, T> MapperBuilder<S, T> start(Class<S> sourceClass, Class<T> targetClass) {
 		return new MapperBuilder<S, T>(sourceClass, targetClass);
 	}
+	
+	public static <S, T> Mapper<S, T> autoBuild(Class<S> sourceClass, Class<T> targetClass){
+		return MapperBuilder.start(sourceClass, targetClass).automatic().build();
+	}
 
 	/**
 	 * get mapper with mappings

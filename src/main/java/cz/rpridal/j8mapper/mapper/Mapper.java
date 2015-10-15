@@ -1,6 +1,8 @@
 package cz.rpridal.j8mapper.mapper;
 
 import java.util.Collection;
+import java.util.List;
+import java.util.Set;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 
@@ -27,6 +29,8 @@ public interface Mapper<S, T> {
 	 * @return Stream of target objects
 	 */
 	Stream<T> map(Collection<? extends S> source, Supplier<T> supplier);
+	
+	Stream<T> map(Collection<? extends S> source);
 
 	/**
 	 * Do map if you have stream of source objects.
@@ -43,5 +47,9 @@ public interface Mapper<S, T> {
 	ClassDefinition<S, T> getClassDefinition();
 
 	T map(S source);
+
+	Set<T> mapToSet(Collection<? extends S> source);
+
+	List<T> mapToList(Collection<? extends S> source);
 
 }
