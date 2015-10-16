@@ -153,11 +153,11 @@ public class MapperBuilderTest {
 		public int getI() {
 			return i;
 		}
-		
+
 		public void setBi(String bi) {
 			this.bi = bi;
 		}
-		
+
 		public String getBi() {
 			return bi;
 		}
@@ -204,8 +204,8 @@ public class MapperBuilderTest {
 		Source s = new Source();
 		s.setI(55);
 		s.setS("text");
-		SameTarget target = MapperBuilder.start(Source.class, SameTarget.class).automatic().build().map(s,
-				SameTarget::new);
+		SameTarget target = MapperBuilder.start(Source.class, SameTarget.class).excludeField("bi").automatic().build()
+				.map(s, SameTarget::new);
 
 		assertEquals("text", target.getS());
 		assertEquals(55, target.getI());
@@ -214,7 +214,7 @@ public class MapperBuilderTest {
 	@Test
 	public void automaticMappingSimpleObjectBuilderNull() {
 		Source s = null;
-		SameTarget target = MapperBuilder.start(Source.class, SameTarget.class).automatic().build().map(s,
+		SameTarget target = MapperBuilder.start(Source.class, SameTarget.class).excludeField("bi").automatic().build().map(s,
 				SameTarget::new);
 
 		assertNull(target);
@@ -226,7 +226,7 @@ public class MapperBuilderTest {
 		s.setI(55);
 		s.setS("text");
 		s.setLs(Arrays.asList("S1", "S2"));
-		SameTarget target = MapperBuilder.start(Source.class, SameTarget.class).automatic().build().map(s,
+		SameTarget target = MapperBuilder.start(Source.class, SameTarget.class).excludeField("bi").automatic().build().map(s,
 				SameTarget::new);
 
 		assertEquals("text", target.getS());
@@ -241,7 +241,7 @@ public class MapperBuilderTest {
 		s.setI(55);
 		s.setS("text");
 		s.setSs(Arrays.asList("S1", "S2"));
-		SameTarget target = MapperBuilder.start(Source.class, SameTarget.class).automatic().build().map(s,
+		SameTarget target = MapperBuilder.start(Source.class, SameTarget.class).excludeField("bi").automatic().build().map(s,
 				SameTarget::new);
 
 		assertEquals("text", target.getS());
@@ -356,16 +356,13 @@ public class MapperBuilderTest {
 		assertEquals("p2", mapList.get(1).getT());
 		assertEquals(2, mapList.get(1).getI());
 	}
-	
+
 	@Test
 	public void mappingListObjectsNull() {
 		List<Source> source = null;
 
 		List<Target> mapList = MapperBuilder.start(Source.class, Target.class).addMapping(Source::getS, Target::setT)
-				.addMapping(Source::getI, Target::setI)
-				.build()
-				.map(source, Target::new)
-				.collect(Collectors.toList());
+				.addMapping(Source::getI, Target::setI).build().map(source, Target::new).collect(Collectors.toList());
 
 		assertTrue(mapList.isEmpty());
 	}
@@ -388,7 +385,7 @@ public class MapperBuilderTest {
 		assertNotNull(result.getDepartment());
 		assertEquals("department", result.getDepartment().getName());
 	}
-	
+
 	@Test
 	public void automaticMappingManualySubMappingOneToOneAddNonautomaticMapperMapping() {
 		EmployeeS employeeS = new EmployeeS();
@@ -400,11 +397,10 @@ public class MapperBuilderTest {
 		Mapper<DepartmentS, DepartmentT> departmentMapper = MapperBuilder.start(DepartmentS.class, DepartmentT.class)
 				.addMapping(DepartmentS::getName, DepartmentT::setName).build();
 
-		EmployeeT result = MapperBuilder
-				.start(EmployeeS.class, EmployeeT.class)
+		EmployeeT result = MapperBuilder.start(EmployeeS.class, EmployeeT.class)
 				.addMapping(EmployeeS::getName, EmployeeT::setName)
-				.addMapping(EmployeeS::getDepartment, EmployeeT::setDepartment, departmentMapper)				
-				.build().map(employeeS, EmployeeT::new);
+				.addMapping(EmployeeS::getDepartment, EmployeeT::setDepartment, departmentMapper).build()
+				.map(employeeS, EmployeeT::new);
 
 		assertEquals("name", result.getName());
 		assertNotNull(result.getDepartment());
@@ -519,6 +515,23 @@ public class MapperBuilderTest {
 	}
 
 	@Test
+	public void mapperCachingTest() {
+		DepartmentS departmentS = new DepartmentS();
+		departmentS.setName("name");
+
+		Mapper<DepartmentS, DepartmentT> departmentMapper1 = MapperBuilder.start(DepartmentS.class, DepartmentT.class)
+				.automatic().addStaticMapping("mapper1", DepartmentT::setName).build();
+
+		Mapper<DepartmentS, DepartmentT> departmentMapper2 = MapperBuilder.start(DepartmentS.class, DepartmentT.class)
+				.automatic().addStaticMapping("mapper2", DepartmentT::setName).build();
+
+		DepartmentT result1 = departmentMapper1.map(departmentS);
+		assertEquals("mapper1", result1.getName());
+		DepartmentT result2 = departmentMapper2.map(departmentS);
+		assertEquals("mapper2", result2.getName());
+	}
+
+	@Test
 	public void megaTest() {
 		DepartmentS departmentS = getDepartment("name");
 		ManagerS manager1 = getManagerS("manager1");
@@ -554,6 +567,42 @@ public class MapperBuilderTest {
 		PersonT result = MapperBuilder.start(PersonS.class, PersonT.class).automatic().build().map(personS);
 
 		assertEquals(50, result.getAge().intValue());
+	}
+
+	@Test
+	public void excludeTest() {
+		PersonS personS = new PersonS();
+		personS.setAge(50);
+		personS.setName("name");
+
+		PersonT result = MapperBuilder.start(PersonS.class, PersonT.class).excludeField("age").automatic().build()
+				.map(personS);
+
+		assertNull(result.getAge());
+		assertEquals("name", result.getName());
+	}
+
+	class A {
+		int a;
+
+		public int getA() {
+			return a;
+		}
+	}
+
+	class B {
+		int b;
+
+		public void setB(int b) {
+			this.b = b;
+		}
+	}
+
+	@Test
+	public void missingFieldsTest() {
+		A a = new A();
+
+		MapperBuilder.start(A.class, B.class).automatic().build();
 	}
 
 	private Predicate<EmployeeT> getNamePredicate(String string) {
