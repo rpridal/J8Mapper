@@ -10,26 +10,31 @@ import cz.rpridal.j8mapper.mapper.MapperStorage;
 import cz.rpridal.j8mapper.setter.MethodSetter;
 import cz.rpridal.j8mapper.transformer.MapperTransformer;
 
-public class MapperManipulatorBuilder<S, T> {
+public class MapperManipulatorBuilder<SourceType, TargetType> {
 	private MapperStorage storage;
 
 	@SuppressWarnings("unchecked")
-	public <SD, TD> Manipulator<S, T> getManipulator(Method getter, Method setter) {
+	public <SourceDataType, TargetDataType> Manipulator<SourceType, TargetType> getManipulator(Method getter,
+			Method setter) {
 		Class<?>[] parameterTypes = setter.getParameterTypes();
-		if(parameterTypes.length != 1){
+		if (parameterTypes.length != 1) {
 			return null;
 		}
-		Class<SD> sourceClass = (Class<SD>) getter.getReturnType();
-		Class<TD> targetClass = (Class<TD>) parameterTypes[0];
-		ClassDefinition<SD, TD> classDefinition = new ClassDefinition<>(sourceClass, targetClass);
-		Mapper<SD, TD> mapper = storage.get(classDefinition);
-		if(mapper!= null){
-			Supplier<TD> supplier = new ClassSupplier<TD>(classDefinition.getTargetClass());
-			Manipulator<S, T> objectManipulator = new TransformerManipulator<S, T, SD, TD>(new MethodGetter<S, SD>(getter), new MethodSetter<>(setter), new MapperTransformer<>(supplier, mapper));
+		Class<SourceDataType> sourceClass = (Class<SourceDataType>) getter.getReturnType();
+		Class<TargetDataType> targetClass = (Class<TargetDataType>) parameterTypes[0];
+		ClassDefinition<SourceDataType, TargetDataType> classDefinition = new ClassDefinition<>(sourceClass,
+				targetClass);
+		Mapper<SourceDataType, TargetDataType> mapper = storage.get(classDefinition);
+		if (mapper != null) {
+			Supplier<TargetDataType> supplier = new ClassSupplier<TargetDataType>(classDefinition.getTargetClass());
+			Manipulator<SourceType, TargetType> objectManipulator = new TransformerManipulator<SourceType, TargetType, SourceDataType, TargetDataType>(
+					new MethodGetter<SourceType, SourceDataType>(getter), new MethodSetter<>(setter),
+					new MapperTransformer<>(supplier, mapper));
 			return objectManipulator;
 		}
 		return null;
 	}
+
 	public void setStorage(MapperStorage storage) {
 		this.storage = storage;
 	}

@@ -8,7 +8,7 @@ import java.util.stream.Stream;
 
 import cz.rpridal.j8mapper.ClassDefinition;
 
-public interface Mapper<S, T> {
+public interface Mapper<SourceType, TargetType> {
 
 	/**
 	 * Do map if you have supplier
@@ -18,7 +18,7 @@ public interface Mapper<S, T> {
 	 *            eg. Target::new
 	 * @return return new instance of target object
 	 */
-	T map(S source, Supplier<T> supplier);
+	TargetType map(SourceType source, Supplier<TargetType> supplier);
 
 	/**
 	 * Do map if you have collection of source objects.
@@ -28,9 +28,9 @@ public interface Mapper<S, T> {
 	 *            supplier eg. Target::new
 	 * @return Stream of target objects
 	 */
-	Stream<T> map(Collection<? extends S> source, Supplier<T> supplier);
-	
-	Stream<T> map(Collection<? extends S> source);
+	Stream<TargetType> map(Collection<? extends SourceType> source, Supplier<TargetType> supplier);
+
+	Stream<TargetType> map(Collection<? extends SourceType> source);
 
 	/**
 	 * Do map if you have stream of source objects.
@@ -40,16 +40,16 @@ public interface Mapper<S, T> {
 	 *            supplier eg. Target::new
 	 * @return Stream of target objects
 	 */
-	Stream<T> map(Stream<? extends S> source, Supplier<T> supplier);
+	Stream<TargetType> map(Stream<? extends SourceType> source, Supplier<TargetType> supplier);
 
-	T map(S source, T target);
-	
-	ClassDefinition<S, T> getClassDefinition();
+	TargetType map(SourceType source, TargetType target);
 
-	T map(S source);
+	ClassDefinition<SourceType, TargetType> getClassDefinition();
 
-	Set<T> mapToSet(Collection<? extends S> source);
+	TargetType map(SourceType source);
 
-	List<T> mapToList(Collection<? extends S> source);
+	Set<TargetType> mapToSet(Collection<? extends SourceType> source);
+
+	List<TargetType> mapToList(Collection<? extends SourceType> source);
 
 }

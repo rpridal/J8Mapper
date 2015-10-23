@@ -8,21 +8,21 @@ import java.util.stream.Stream;
 
 import cz.rpridal.j8mapper.ClassDefinition;
 
-public class MethodMapper<S, T> extends LambdaMapper<S, T> {
+public class MethodMapper<SourceType, TargetType> extends LambdaMapper<SourceType, TargetType> {
 
 	private Map<ClassDefinition<?, ?>, Mapper<?, ?>> mappers = new HashMap<>();
 
-	public MethodMapper(ClassDefinition<S, T> classDefinition) {
+	public MethodMapper(ClassDefinition<SourceType, TargetType> classDefinition) {
 		super(classDefinition);
 	}
 
 	public void addSubMapper(Mapper<?, ?> subMapper) {
 		mappers.put(subMapper.getClassDefinition(), subMapper);
 	}
-	
+
 	@Override
-	public Stream<T> map(Collection<? extends S> source, Supplier<T> supplier) {
-		if(source == null){
+	public Stream<TargetType> map(Collection<? extends SourceType> source, Supplier<TargetType> supplier) {
+		if (source == null) {
 			return null;
 		}
 		return super.map(source, supplier);

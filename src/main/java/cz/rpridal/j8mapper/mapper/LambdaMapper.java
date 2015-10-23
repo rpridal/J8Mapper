@@ -17,26 +17,29 @@ import cz.rpridal.j8mapper.transformer.Transformer;
  * 
  * @author rpridal
  *
- * @param <S> source type
- * @param <T> target type
+ * @param <SourceType>
+ *            source type
+ * @param <TargetType>
+ *            target type
  */
-public class LambdaMapper<S, T> extends AbstractMapper<S, T> {
-	public LambdaMapper(ClassDefinition<S, T> classDefinition) {
+public class LambdaMapper<SourceType, TargetType> extends AbstractMapper<SourceType, TargetType> {
+	public LambdaMapper(ClassDefinition<SourceType, TargetType> classDefinition) {
 		super(classDefinition);
 	}
 
-	protected final Set<Manipulator<S, T>> manipulators = new HashSet<Manipulator<S, T>>();
+	protected final Set<Manipulator<SourceType, TargetType>> manipulators = new HashSet<Manipulator<SourceType, TargetType>>();
 
-	public <D> void registerMapping(Getter<S, D> getter, Setter<T, D> setter) {
-		manipulators.add(new IdentityManipulator<S, T, D>(getter, setter));
+	public <DataType> void registerMapping(Getter<SourceType, DataType> getter, Setter<TargetType, DataType> setter) {
+		manipulators.add(new IdentityManipulator<SourceType, TargetType, DataType>(getter, setter));
 	}
 
-	public <D> void registerMapping(D data, Setter<T, D> setter) {
-		manipulators.add(new IdentityManipulator<S, T, D>(s -> data, setter));
+	public <DataType> void registerMapping(DataType data, Setter<TargetType, DataType> setter) {
+		manipulators.add(new IdentityManipulator<SourceType, TargetType, DataType>(s -> data, setter));
 	}
 
-	public <SD, TD> void registerMapping(Getter<S, SD> getter, Setter<T, TD> setter, Transformer<SD, TD> transformer) {
-		manipulators.add(new TransformerManipulator<>(getter, setter, transformer));		
+	public <SourceDataType, TargetDataType> void registerMapping(Getter<SourceType, SourceDataType> getter,
+			Setter<TargetType, TargetDataType> setter, Transformer<SourceDataType, TargetDataType> transformer) {
+		manipulators.add(new TransformerManipulator<>(getter, setter, transformer));
 	}
 
 	/**
@@ -48,15 +51,15 @@ public class LambdaMapper<S, T> extends AbstractMapper<S, T> {
 	 *            object
 	 * @return target object - the same instance as parameter
 	 */
-	public T map(S source, T target) {
-		if(source == null){
+	public TargetType map(SourceType source, TargetType target) {
+		if (source == null) {
 			return null;
 		}
 		manipulators.stream().forEach(m -> m.map(source, target));
 		return target;
 	}
 
-	public void addManipulator(Manipulator<S, T> methodManipulator) {
+	public void addManipulator(Manipulator<SourceType, TargetType> methodManipulator) {
 		manipulators.add(methodManipulator);
 	}
 }

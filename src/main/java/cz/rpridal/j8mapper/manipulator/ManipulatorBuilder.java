@@ -25,7 +25,7 @@ import cz.rpridal.j8mapper.transformer.IdentityTransformer;
 import cz.rpridal.j8mapper.transformer.MapperTransformer;
 import cz.rpridal.j8mapper.transformer.Transformer;
 
-public class ManipulatorBuilder<S, T> {
+public class ManipulatorBuilder<SourceType, TargetType> {
 
 	private static class Methods {
 		private final Method getter;
@@ -69,40 +69,43 @@ public class ManipulatorBuilder<S, T> {
 		}
 	}
 
-	private MapperManipulatorBuilder<S, T> objectManipulatorBuilder = new MapperManipulatorBuilder<>();
+	private MapperManipulatorBuilder<SourceType, TargetType> objectManipulatorBuilder = new MapperManipulatorBuilder<>();
 	private final MapperStorage storage;
 	private static final Map<Methods, Manipulator<?, ?>> manipulators = Collections.synchronizedMap(new HashMap<>());
 	private static final Semaphore<Methods> semaphore = new Semaphore<>(3);
 
-	public ManipulatorBuilder(Class<S> source, Class<T> target, MapperStorage storage) {
+	public ManipulatorBuilder(Class<SourceType> source, Class<TargetType> target, MapperStorage storage) {
 		this.storage = storage;
 	}
 
-	public static <S, T> ManipulatorBuilder<S, T> start(Class<S> source, Class<T> target, MapperStorage storage) {
-		return new ManipulatorBuilder<S, T>(source, target, storage);
+	public static <SourceType, TargetType> ManipulatorBuilder<SourceType, TargetType> start(Class<SourceType> source,
+			Class<TargetType> target, MapperStorage storage) {
+		return new ManipulatorBuilder<SourceType, TargetType>(source, target, storage);
 	}
 
-	public Manipulator<S, T> getManipulator(Method getter, Method setter) {
+	public Manipulator<SourceType, TargetType> getManipulator(Method getter, Method setter) {
 		Methods methods = new Methods(getter, setter);
 		if (!manipulators.containsKey(methods)) {
 			if (ManipulatorBuilder.semaphore.isLocked(methods)) {
-				return new IdentityCacheManipulator<S, T>(getter, setter);
+				return new IdentityCacheManipulator<SourceType, TargetType>(getter, setter);
 			}
 			ManipulatorBuilder.semaphore.lock(methods);
-			Manipulator<S, T> manipulator = createManipulator(getter, setter);
-			if(manipulator != null){
+			Manipulator<SourceType, TargetType> manipulator = createManipulator(getter, setter);
+			if (manipulator != null) {
 				manipulators.put(methods, manipulator);
 			}
 			ManipulatorBuilder.semaphore.unlock(methods);
 		}
-		return ((Manipulator<S, T>) manipulators.get(methods));
+		return ((Manipulator<SourceType, TargetType>) manipulators.get(methods));
 
 	}
 
-	public <SD, TD> Manipulator<S, T> createManipulator(Method getter, Method setter) {
-		Class<SD> sourceClass = (Class<SD>) getter.getReturnType();
-		Class<TD> targetClass = (Class<TD>) setter.getParameterTypes()[0];
-		SimpleMethodManipulator<S, T> methodManipulator = new SimpleMethodManipulator<>(getter, setter);
+	public <SourceDataType, TargetDataType> Manipulator<SourceType, TargetType> createManipulator(Method getter,
+			Method setter) {
+		Class<SourceDataType> sourceClass = (Class<SourceDataType>) getter.getReturnType();
+		Class<TargetDataType> targetClass = (Class<TargetDataType>) setter.getParameterTypes()[0];
+		SimpleMethodManipulator<SourceType, TargetType> methodManipulator = new SimpleMethodManipulator<>(getter,
+				setter);
 		if (methodManipulator.isApplicable()) {
 			return methodManipulator;
 		} else if (Collection.class.isAssignableFrom(sourceClass) && List.class.isAssignableFrom(targetClass)) {
@@ -116,24 +119,29 @@ public class ManipulatorBuilder<S, T> {
 		}
 	}
 
-	private <SD extends Enum<SD>, TD extends Enum<TD>> Manipulator<S, T> processEnum(Method getter, Method setter,
-			Class<SD> sourceClass, Class<TD> targetClass) {
-		return new TransformerManipulator<S, T, SD, TD>(new MethodGetter<>(getter), new MethodSetter<>(setter),
-				new EnumTransformer<SD, TD>(sourceClass, targetClass));
+	private <SourceDataType extends Enum<SourceDataType>, TargetDataType extends Enum<TargetDataType>> Manipulator<SourceType, TargetType> processEnum(
+			Method getter, Method setter, Class<SourceDataType> sourceClass, Class<TargetDataType> targetClass) {
+		return new TransformerManipulator<SourceType, TargetType, SourceDataType, TargetDataType>(
+				new MethodGetter<>(getter), new MethodSetter<>(setter),
+				new EnumTransformer<SourceDataType, TargetDataType>(sourceClass, targetClass));
 	}
 
 	@SuppressWarnings("unchecked")
-	private <TD, SD, SDL extends Collection<SD>, TDL extends Collection<TD>> Manipulator<S, T> processCollection(
-			Method getter, Method setter, Supplier<TDL> supplier) {
-		Class<SD> listSourceClass = (Class<SD>) getFirstGenericTypeFromMethod(getter.getGenericReturnType());
-		Class<TD> listTargetClass = (Class<TD>) getFirstGenericTypeFromMethod(setter.getGenericParameterTypes()[0]);
-		return new CollectionManipulator<S, T, SDL, TDL, SD, TD>(new MethodGetter<>(getter), new MethodSetter<>(setter),
+	private <TargetDataType, SourceDataType, SourceDataCollection extends Collection<SourceDataType>, TargetDataCollection extends Collection<TargetDataType>> Manipulator<SourceType, TargetType> processCollection(
+			Method getter, Method setter, Supplier<TargetDataCollection> supplier) {
+		Class<SourceDataType> listSourceClass = (Class<SourceDataType>) getFirstGenericTypeFromMethod(
+				getter.getGenericReturnType());
+		Class<TargetDataType> listTargetClass = (Class<TargetDataType>) getFirstGenericTypeFromMethod(
+				setter.getGenericParameterTypes()[0]);
+		return new CollectionManipulator<SourceType, TargetType, SourceDataCollection, TargetDataCollection, SourceDataType, TargetDataType>(
+				new MethodGetter<>(getter), new MethodSetter<>(setter),
 				getTransformer(listSourceClass, listTargetClass), supplier);
 	}
 
-	private <SD, TD> Transformer<SD, TD> getTransformer(Class<SD> listSourceClass, Class<TD> listTargetClass) {
+	private <SourceDataType, TargetDataType> Transformer<SourceDataType, TargetDataType> getTransformer(
+			Class<SourceDataType> listSourceClass, Class<TargetDataType> listTargetClass) {
 		if (listSourceClass.equals(listTargetClass)) {
-			return new IdentityTransformer<SD, TD>();
+			return new IdentityTransformer<SourceDataType, TargetDataType>();
 		}
 		return new MapperTransformer<>(new ClassSupplier<>(listTargetClass),
 				getMapper(listSourceClass, listTargetClass));
@@ -150,7 +158,7 @@ public class ManipulatorBuilder<S, T> {
 		return null;
 	}
 
-	private Manipulator<S, T> getMapperManipulator(Method getter, Method setter, Class<?> sourceClass,
+	private Manipulator<SourceType, TargetType> getMapperManipulator(Method getter, Method setter, Class<?> sourceClass,
 			Class<?> targetClass) {
 		ClassDefinition<?, ?> classDefinition = new ClassDefinition<>(sourceClass, targetClass);
 		if (!storage.hasMapper(classDefinition)) {
@@ -159,12 +167,14 @@ public class ManipulatorBuilder<S, T> {
 		}
 
 		this.objectManipulatorBuilder.setStorage(this.storage);
-		Manipulator<S, T> manipulator = this.objectManipulatorBuilder.getManipulator(getter, setter);
+		Manipulator<SourceType, TargetType> manipulator = this.objectManipulatorBuilder.getManipulator(getter, setter);
 		return manipulator;
 	}
 
-	private <XS, XT> Mapper<XS, XT> getMapper(Class<XS> sourceClass, Class<XT> targetClass) {
-		ClassDefinition<XS, XT> classDefinition = new ClassDefinition<>(sourceClass, targetClass);
+	private <MapperSourceType, MapperTargetType> Mapper<MapperSourceType, MapperTargetType> getMapper(
+			Class<MapperSourceType> sourceClass, Class<MapperTargetType> targetClass) {
+		ClassDefinition<MapperSourceType, MapperTargetType> classDefinition = new ClassDefinition<>(sourceClass,
+				targetClass);
 		if (!storage.hasMapper(classDefinition)) {
 			Mapper<?, ?> mapper = MapperBuilder.start(sourceClass, targetClass).automatic().build();
 			storage.store(mapper);

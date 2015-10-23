@@ -4,13 +4,15 @@ import cz.rpridal.j8mapper.getter.Getter;
 import cz.rpridal.j8mapper.setter.Setter;
 import cz.rpridal.j8mapper.transformer.Transformer;
 
-public class TransformerManipulator<S, T, SD, TD> implements Manipulator<S, T> {
+public class TransformerManipulator<SourceType, TargetType, SourceDataType, TargetDataType>
+		implements Manipulator<SourceType, TargetType> {
 
-	private final Getter<S, SD> getter;
-	private final Setter<T, TD> setter;
-	private final Transformer<SD, TD> transformer;
+	private final Getter<SourceType, SourceDataType> getter;
+	private final Setter<TargetType, TargetDataType> setter;
+	private final Transformer<SourceDataType, TargetDataType> transformer;
 
-	public TransformerManipulator(Getter<S, SD> getter, Setter<T, TD> setter, Transformer<SD, TD> transformer) {
+	public TransformerManipulator(Getter<SourceType, SourceDataType> getter, Setter<TargetType, TargetDataType> setter,
+			Transformer<SourceDataType, TargetDataType> transformer) {
 		super();
 		if (getter == null || setter == null || transformer == null) {
 			throw new NullPointerException();
@@ -21,15 +23,15 @@ public class TransformerManipulator<S, T, SD, TD> implements Manipulator<S, T> {
 	}
 
 	@Override
-	public void map(S source, T target) {
+	public void map(SourceType source, TargetType target) {
 		if (source == null) {
 			return;
 		}
-		SD data = getter.get(source);
+		SourceDataType data = getter.get(source);
 		if (data == null) {
 			return;
 		}
-		TD transformedData = transformer.transform(data);
+		TargetDataType transformedData = transformer.transform(data);
 		if (transformedData == null) {
 			return;
 		}

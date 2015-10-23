@@ -5,7 +5,7 @@ import java.lang.reflect.Method;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-public class MethodGetter<S, D> implements Getter<S, D> {
+public class MethodGetter<SourceType, DataType> implements Getter<SourceType, DataType> {
 	private static final Logger LOGGER = Logger.getLogger(MethodGetter.class.getName());
 	private final Method method;
 
@@ -19,10 +19,10 @@ public class MethodGetter<S, D> implements Getter<S, D> {
 
 	@SuppressWarnings("unchecked")
 	@Override
-	public D get(S source) {
-		D data = null;
+	public DataType get(SourceType source) {
+		DataType data = null;
 		try {
-			data = (D) method.invoke(source);
+			data = (DataType) method.invoke(source);
 		} catch (IllegalAccessException e) {
 			// TODO Auto-generated catch block
 			LOGGER.log(Level.FINE, "IllegalAccessException", e);

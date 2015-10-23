@@ -1,5 +1,5 @@
 package cz.rpridal.j8mapper.manipulator;
 
-public interface Manipulator <S, T>{
-	public void map(S source, T target);
+public interface Manipulator<SourceType, TargetType> {
+	public void map(SourceType source, TargetType target);
 }

@@ -12,18 +12,17 @@ import cz.rpridal.j8mapper.SimpleMapperStorage;
 import cz.rpridal.j8mapper.manipulator.Manipulator;
 import cz.rpridal.j8mapper.manipulator.ManipulatorBuilder;
 
-public class CanAutomaticMapperBuilder<S, T> extends MapperBuilder<S, T> {
-	
+public class CanAutomaticMapperBuilder<SourceType, TargetType> extends MapperBuilder<SourceType, TargetType> {
+
 	private static final Logger LOGGER = Logger.getLogger(CanAutomaticMapperBuilder.class.getName());
-	
+
 	private MapperStorage storage = new SimpleMapperStorage();
-	
-	protected CanAutomaticMapperBuilder(Class<S> sourceClass, Class<T> targetClass) {
+
+	protected CanAutomaticMapperBuilder(Class<SourceType> sourceClass, Class<TargetType> targetClass) {
 		super(sourceClass, targetClass);
 	}
-	
-	
-	public MapperBuilder<S, T> automatic() {
+
+	public MapperBuilder<SourceType, TargetType> automatic() {
 		if (!this.storage.hasMapper(this.classDefinition)) {
 			initMapper();
 			processManipulators(scanGetters(classDefinition.getSourceClass()),
@@ -31,13 +30,13 @@ public class CanAutomaticMapperBuilder<S, T> extends MapperBuilder<S, T> {
 		}
 		return this;
 	}
-	
+
 	private void processManipulators(Map<String, Method> getters, Map<String, Method> setters) {
 		for (String methodName : getters.keySet()) {
 			Method getter = getters.get(methodName);
 			Method setter = setters.get(methodName);
 			if (getter != null && setter != null) {
-				Manipulator<S, T> manipulator = ManipulatorBuilder
+				Manipulator<SourceType, TargetType> manipulator = ManipulatorBuilder
 						.start(this.classDefinition.getSourceClass(), this.classDefinition.getTargetClass(), storage)
 						.getManipulator(getter, setter);
 				if (manipulator != null) {
@@ -52,14 +51,14 @@ public class CanAutomaticMapperBuilder<S, T> extends MapperBuilder<S, T> {
 			}
 		}
 	}
-	
+
 	private void initMapper() {
 		if (this.methodMapper == null) {
 			this.methodMapper = new MethodMapper<>(this.classDefinition);
 		}
 	}
-	
-	private Map<String, Method> scanGetters(Class<? extends S> clazz) {
+
+	private Map<String, Method> scanGetters(Class<? extends SourceType> clazz) {
 		Map<String, Method> result = new HashMap<>();
 		try {
 			for (PropertyDescriptor propertyDescriptor : Introspector.getBeanInfo(clazz).getPropertyDescriptors()) {
@@ -78,8 +77,8 @@ public class CanAutomaticMapperBuilder<S, T> extends MapperBuilder<S, T> {
 		}
 		return result;
 	}
-	
-	private Map<String, Method> scanSetters(Class<? extends T> clazz) {
+
+	private Map<String, Method> scanSetters(Class<? extends TargetType> clazz) {
 		Map<String, Method> result = new HashMap<>();
 		try {
 			for (PropertyDescriptor propertyDescriptor : Introspector.getBeanInfo(clazz).getPropertyDescriptors()) {
@@ -99,7 +98,7 @@ public class CanAutomaticMapperBuilder<S, T> extends MapperBuilder<S, T> {
 		return result;
 	}
 
-	public CanAutomaticMapperBuilder<S, T> addMapper(Mapper<?, ?> subMapper) {
+	public CanAutomaticMapperBuilder<SourceType, TargetType> addMapper(Mapper<?, ?> subMapper) {
 		this.storage.store(subMapper);
 		return this;
 	}
@@ -114,7 +113,7 @@ public class CanAutomaticMapperBuilder<S, T> extends MapperBuilder<S, T> {
 	 * @param fieldName
 	 * @return MapperBuilder
 	 */
-	public CanAutomaticMapperBuilder<S, T> excludeField(String fieldName) {
+	public CanAutomaticMapperBuilder<SourceType, TargetType> excludeField(String fieldName) {
 		this.exclusionFields.add(fieldName);
 		return this;
 	}

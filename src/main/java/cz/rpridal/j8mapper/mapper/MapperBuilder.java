@@ -16,25 +16,25 @@ import cz.rpridal.j8mapper.transformer.Transformer;
  * 
  * @author rpridal
  *
- * @param <S>
+ * @param <SourceType>
  *            source type
- * @param <T>
+ * @param <TargetType>
  *            target type
  */
-public class MapperBuilder<S, T> {
+public class MapperBuilder<SourceType, TargetType> {
 
 	private static final Logger LOGGER = Logger.getLogger(MapperBuilder.class.getName());
 
-	private LambdaMapper<S, T> lambdaMapper;
-	protected ClassDefinition<S, T> classDefinition;
-	protected MethodMapper<S, T> methodMapper = null;
+	private LambdaMapper<SourceType, TargetType> lambdaMapper;
+	protected ClassDefinition<SourceType, TargetType> classDefinition;
+	protected MethodMapper<SourceType, TargetType> methodMapper = null;
 	protected final Set<String> exclusionFields = new HashSet<>();
 
 	{
 		exclusionFields.add("class");
 	}
 
-	protected MapperBuilder(Class<S> sourceClass, Class<T> targetClass) {
+	protected MapperBuilder(Class<SourceType> sourceClass, Class<TargetType> targetClass) {
 		this.classDefinition = new ClassDefinition<>(sourceClass, targetClass);
 		this.lambdaMapper = new LambdaMapper<>(this.classDefinition);
 	}
@@ -62,9 +62,9 @@ public class MapperBuilder<S, T> {
 	 * 
 	 * @return mapper
 	 */
-	public Mapper<S, T> build() {
+	public Mapper<SourceType, TargetType> build() {
 		if (this.methodMapper != null) {
-			CompositeMapper<S, T> compositeMapper = new CompositeMapper<>(this.classDefinition);
+			CompositeMapper<SourceType, TargetType> compositeMapper = new CompositeMapper<>(this.classDefinition);
 			compositeMapper.registrateMapper(this.methodMapper);
 			compositeMapper.registrateMapper(this.lambdaMapper);
 			return compositeMapper;
@@ -81,7 +81,8 @@ public class MapperBuilder<S, T> {
 	 *            - sets data to target object
 	 * @return instance of mapperbuilder itself
 	 */
-	public <D> MapperBuilder<S, T> addMapping(Getter<S, D> getter, Setter<T, D> setter) {
+	public <DataType> MapperBuilder<SourceType, TargetType> addMapping(Getter<SourceType, DataType> getter,
+			Setter<TargetType, DataType> setter) {
 		registerMapping(getter, setter);
 		return this;
 	}
@@ -98,8 +99,9 @@ public class MapperBuilder<S, T> {
 	 *            - transform data from output of getter to input of setter
 	 * @return instance of mapperbuilder itself
 	 */
-	public <SD, TD> MapperBuilder<S, T> addMapping(Getter<S, SD> getter, Setter<T, TD> setter,
-			Transformer<SD, TD> transformer) {
+	public <SourceDataType, TargetDataType> MapperBuilder<SourceType, TargetType> addMapping(
+			Getter<SourceType, SourceDataType> getter, Setter<TargetType, TargetDataType> setter,
+			Transformer<SourceDataType, TargetDataType> transformer) {
 		registerMapping(getter, setter, transformer);
 		return this;
 	}
@@ -116,9 +118,11 @@ public class MapperBuilder<S, T> {
 	 *            - transform data from output of getter to input of setter
 	 * @return instance of mapperbuilder itself
 	 */
-	public <SD, TD> MapperBuilder<S, T> addMapping(Getter<S, SD> getter, Setter<T, TD> setter, Mapper<SD, TD> mapper) {
-		registerMapping(getter, setter,
-				new MapperTransformer<>(new ClassSupplier<TD>(mapper.getClassDefinition().getTargetClass()), mapper));
+	public <SourceDataType, TargetDataType> MapperBuilder<SourceType, TargetType> addMapping(
+			Getter<SourceType, SourceDataType> getter, Setter<TargetType, TargetDataType> setter,
+			Mapper<SourceDataType, TargetDataType> mapper) {
+		registerMapping(getter, setter, new MapperTransformer<>(
+				new ClassSupplier<TargetDataType>(mapper.getClassDefinition().getTargetClass()), mapper));
 		return this;
 	}
 
@@ -131,17 +135,18 @@ public class MapperBuilder<S, T> {
 	 *            - sets data to target object
 	 * @return instance of MapperBuilder itself
 	 */
-	public <D> MapperBuilder<S, T> addStaticMapping(D data, Setter<T, D> setter) {
+	public <DataType> MapperBuilder<SourceType, TargetType> addStaticMapping(DataType data,
+			Setter<TargetType, DataType> setter) {
 		registerMapping(s -> data, setter);
 		return this;
 	}
 
-
-	private <SD, TD> void registerMapping(Getter<S, SD> getter, Setter<T, TD> setter, Transformer<SD, TD> transformer) {
+	private <SourceDataType, TargetDataType> void registerMapping(Getter<SourceType, SourceDataType> getter,
+			Setter<TargetType, TargetDataType> setter, Transformer<SourceDataType, TargetDataType> transformer) {
 		lambdaMapper.registerMapping(getter, setter, transformer);
 	}
 
-	private <D> void registerMapping(Getter<S, D> getter, Setter<T, D> setter) {
+	private <Data> void registerMapping(Getter<SourceType, Data> getter, Setter<TargetType, Data> setter) {
 		lambdaMapper.registerMapping(getter, setter);
 	}
 }

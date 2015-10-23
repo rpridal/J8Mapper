@@ -9,7 +9,7 @@ import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-public class SimpleMethodManipulator<S, T> implements Manipulator<S, T> {
+public class SimpleMethodManipulator<SourceType, TargetType> implements Manipulator<SourceType, TargetType> {
 
 	private static final Logger LOGGER = Logger.getLogger(SimpleMethodManipulator.class.getName());
 	private final Method sourceMethod;
@@ -22,7 +22,7 @@ public class SimpleMethodManipulator<S, T> implements Manipulator<S, T> {
 	}
 
 	@Override
-	public void map(S source, T target) {
+	public void map(SourceType source, TargetType target) {
 		try {
 			Object data = sourceMethod.invoke(source);
 			targetMethod.invoke(target, data);
@@ -40,27 +40,26 @@ public class SimpleMethodManipulator<S, T> implements Manipulator<S, T> {
 
 	public boolean isApplicable() {
 		Class<?>[] parameterTypes = targetMethod.getParameterTypes();
-		if(parameterTypes.length != 1){
+		if (parameterTypes.length != 1) {
 			return false;
 		}
 		Class<?> sourceClass = sourceMethod.getReturnType();
 		Class<?> targetClass = parameterTypes[0];
 		if (!sourceClass.equals(targetClass)) {
-			if(sourceClass.isPrimitive() || targetClass.isPrimitive()){
+			if (sourceClass.isPrimitive() || targetClass.isPrimitive()) {
 				return isRelated(sourceClass, targetClass);
 			}
 			return false;
 		}
 		TypeVariable<?>[] sourceTypeParameters = sourceClass.getTypeParameters();
 		TypeVariable<?>[] targetTypeParameters = targetMethod.getReturnType().getTypeParameters();
-		if(sourceTypeParameters == null && targetTypeParameters == null){
+		if (sourceTypeParameters == null && targetTypeParameters == null) {
 			return true;
 		}
-		
-		return Arrays.equals(sourceTypeParameters,
-				targetTypeParameters);
+
+		return Arrays.equals(sourceTypeParameters, targetTypeParameters);
 	}
-	
+
 	private static Map<Class<?>, Class<?>> primitivesToBoxed = new HashMap<>();
 
 	static {
@@ -74,21 +73,21 @@ public class SimpleMethodManipulator<S, T> implements Manipulator<S, T> {
 		primitivesToBoxed.put(Short.TYPE, Short.class);
 	}
 
-	protected static <S, T> boolean isRelated(Class<S> class1, Class<T> class2) {
+	protected static <SourceType, TargetType> boolean isRelated(Class<SourceType> class1, Class<TargetType> class2) {
 		Class<?> primitiveClass1 = primitivesToBoxed.get(class1);
 		Class<?> primitiveClass2 = primitivesToBoxed.get(class2);
 		Class<?> primitiveClass = null;
 		Class<?> clazz = null;
-		if(primitiveClass1 != null){
+		if (primitiveClass1 != null) {
 			primitiveClass = primitiveClass1;
 			clazz = class2;
-		}else if(primitiveClass2 != null){
+		} else if (primitiveClass2 != null) {
 			primitiveClass = primitiveClass2;
 			clazz = class1;
-		}else{
+		} else {
 			return false;
 		}
 		return primitiveClass.equals(clazz);
-	}	
+	}
 
 }

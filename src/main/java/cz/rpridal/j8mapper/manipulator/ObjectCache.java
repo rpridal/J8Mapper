@@ -16,7 +16,7 @@ public class ObjectCache {
 		return objectCache.get(source);
 	}
 
-	public synchronized static <S, T> void saveObjects(S source, T target) {
+	public synchronized static <SourceType, TargetType> void saveObjects(SourceType source, TargetType target) {
 		if (objectCache.containsKey(source)) {
 			LOGGER.fine("Object is already in cache! Source object" + source + "; Target object:" + target);
 		}

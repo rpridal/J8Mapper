@@ -7,7 +7,7 @@ import java.util.Map;
 public class Semaphore<K> {
 	private Map<K, Integer> semaphore = Collections.synchronizedMap(new HashMap<>());
 	private final int boundary;
-	
+
 	public Semaphore(int boundary) {
 		super();
 		this.boundary = boundary;
@@ -29,11 +29,11 @@ public class Semaphore<K> {
 			} else {
 				semaphore.put(key, count - 1);
 			}
-		} 
+		}
 	}
 
-	public boolean isLocked(K key){
-		if(!semaphore.containsKey(key)){
+	public boolean isLocked(K key) {
+		if (!semaphore.containsKey(key)) {
 			return false;
 		}
 		return semaphore.get(key) >= boundary;

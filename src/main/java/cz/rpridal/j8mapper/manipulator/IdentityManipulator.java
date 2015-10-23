@@ -4,16 +4,22 @@ import cz.rpridal.j8mapper.getter.Getter;
 import cz.rpridal.j8mapper.setter.Setter;
 
 /**
- * Object for connection getters and setters 
+ * Object for connection getters and setters
+ * 
  * @author rpridal
  *
- * @param <S> source type
- * @param <T> target type
- * @param <D> data type
+ * @param <SourceType>
+ *            source type
+ * @param <TargetType>
+ *            target type
+ * @param <DataType>
+ *            data type
  */
-public class IdentityManipulator<S, T, D> extends TransformerManipulator<S, T, D, D> implements Manipulator<S, T> {
+public class IdentityManipulator<SourceType, TargetType, DataType>
+		extends TransformerManipulator<SourceType, TargetType, DataType, DataType>
+		implements Manipulator<SourceType, TargetType> {
 
-	public IdentityManipulator(Getter<S, D> getter, Setter<T, D> setter) {
+	public IdentityManipulator(Getter<SourceType, DataType> getter, Setter<TargetType, DataType> setter) {
 		super(getter, setter, d -> d);
 	}
 }

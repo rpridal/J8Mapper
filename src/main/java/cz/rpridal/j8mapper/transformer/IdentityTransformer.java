@@ -1,11 +1,11 @@
 package cz.rpridal.j8mapper.transformer;
 
-public class IdentityTransformer<S, T> implements Transformer<S, T> {
+public class IdentityTransformer<SourceType, TargetType> implements Transformer<SourceType, TargetType> {
 
 	@SuppressWarnings("unchecked")
 	@Override
-	public T transform(S data) {
-		return (T) data;
+	public TargetType transform(SourceType data) {
+		return (TargetType) data;
 	}
- 
+
 }

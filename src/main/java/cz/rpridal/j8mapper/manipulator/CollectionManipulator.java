@@ -9,28 +9,31 @@ import cz.rpridal.j8mapper.getter.Getter;
 import cz.rpridal.j8mapper.setter.Setter;
 import cz.rpridal.j8mapper.transformer.Transformer;
 
-public class CollectionManipulator<S, T, SDL extends Collection<? extends SD>, TDL extends Collection<TD>, SD, TD> implements Manipulator<S, T> {
+public class CollectionManipulator<SourceType, TargetType, SourceDataCollectionType extends Collection<? extends SourceDataType>, TargetDataCollectionType extends Collection<TargetDataType>, SourceDataType, TargetDataType>
+		implements Manipulator<SourceType, TargetType> {
 
-	private final Getter<S, SDL> getter;
-	private final Setter<T, TDL> setter;
-	private final Transformer<SD, TD> transformer;
-	private final Supplier<TDL> supplier;
-	
-	public CollectionManipulator(Getter<S, SDL> getter, Setter<T, TDL> setter, Transformer<SD, TD> transformer, Supplier<TDL> supplier) {
+	private final Getter<SourceType, SourceDataCollectionType> getter;
+	private final Setter<TargetType, TargetDataCollectionType> setter;
+	private final Transformer<SourceDataType, TargetDataType> transformer;
+	private final Supplier<TargetDataCollectionType> supplier;
+
+	public CollectionManipulator(Getter<SourceType, SourceDataCollectionType> getter,
+			Setter<TargetType, TargetDataCollectionType> setter,
+			Transformer<SourceDataType, TargetDataType> transformer, Supplier<TargetDataCollectionType> supplier) {
 		this.getter = getter;
 		this.setter = setter;
 		this.transformer = transformer;
 		this.supplier = supplier;
 	}
-	
+
 	@Override
-	public void map(S source, T target) {
-		SDL sdl = getter.get(source);
-		if(sdl == null){
+	public void map(SourceType source, TargetType target) {
+		SourceDataCollectionType sdl = getter.get(source);
+		if (sdl == null) {
 			return;
 		}
-		Stream<TD> map = sdl.stream().map(transformer::transform);
-		TDL collect = map.collect(Collectors.toCollection(supplier));
+		Stream<TargetDataType> map = sdl.stream().map(transformer::transform);
+		TargetDataCollectionType collect = map.collect(Collectors.toCollection(supplier));
 		setter.set(target, collect);
 	}
 }

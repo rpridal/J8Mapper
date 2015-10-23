@@ -5,8 +5,8 @@ import java.lang.reflect.Method;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-public class IdentityCacheManipulator<S, T> implements Manipulator<S, T> {
-	
+public class IdentityCacheManipulator<SourceType, TargetType> implements Manipulator<SourceType, TargetType> {
+
 	private static final Logger LOGGER = Logger.getLogger(IdentityCacheManipulator.class.getName());
 	private final Method getter;
 	private final Method setter;
@@ -17,14 +17,14 @@ public class IdentityCacheManipulator<S, T> implements Manipulator<S, T> {
 	}
 
 	@Override
-	public void map(S source, T target) {
+	public void map(SourceType source, TargetType target) {
 		try {
 			Object sourceData = getter.invoke(source);
-			if(sourceData == null){
+			if (sourceData == null) {
 				return;
 			}
 			Object targetObject = ObjectCache.getTargetObject(sourceData);
-			if(targetObject == null){
+			if (targetObject == null) {
 				return;
 			}
 			setter.invoke(target, targetObject);

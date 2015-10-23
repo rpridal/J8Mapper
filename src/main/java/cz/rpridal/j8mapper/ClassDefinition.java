@@ -1,23 +1,23 @@
 package cz.rpridal.j8mapper;
 
-public class ClassDefinition<S, T>{
+public class ClassDefinition<SourceType, TargetType> {
 	/**
 	 * 
 	 */
-	private Class<S> sourceClass;
-	private Class<T> targetClass;
-	
-	public ClassDefinition(Class<S> sourceClass, Class<T> targetClass) {
+	private Class<SourceType> sourceClass;
+	private Class<TargetType> targetClass;
+
+	public ClassDefinition(Class<SourceType> sourceClass, Class<TargetType> targetClass) {
 		super();
 		this.sourceClass = sourceClass;
 		this.targetClass = targetClass;
-	}			
-	
-	public Class<S> getSourceClass() {
+	}
+
+	public Class<SourceType> getSourceClass() {
 		return sourceClass;
 	}
-	
-	public Class<T> getTargetClass() {
+
+	public Class<TargetType> getTargetClass() {
 		return targetClass;
 	}
 
@@ -52,5 +52,5 @@ public class ClassDefinition<S, T>{
 			return false;
 		return true;
 	}
-	
+
 }

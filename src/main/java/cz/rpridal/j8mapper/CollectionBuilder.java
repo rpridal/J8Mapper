@@ -8,7 +8,8 @@ import java.util.Set;
 
 public class CollectionBuilder {
 
-	public static <D> Collection<D> getInstance(Class<? extends Collection<?>> collectionClass, Class<D> targetClass) {
+	public static <DataType> Collection<DataType> getInstance(Class<? extends Collection<?>> collectionClass,
+			Class<DataType> targetClass) {
 		if (Set.class.isAssignableFrom(collectionClass)) {
 			return new HashSet<>();
 		} else if (List.class.isAssignableFrom(collectionClass)) {
