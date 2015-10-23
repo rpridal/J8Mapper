@@ -7,6 +7,8 @@ import java.util.function.Supplier;
 import java.util.stream.Stream;
 
 import cz.rpridal.j8mapper.ClassDefinition;
+import cz.rpridal.j8mapper.getter.Getter;
+import cz.rpridal.j8mapper.setter.Setter;
 
 public interface Mapper<SourceType, TargetType> {
 
@@ -52,4 +54,9 @@ public interface Mapper<SourceType, TargetType> {
 
 	List<TargetType> mapToList(Collection<? extends SourceType> source);
 
+	<DataType> Mapper<SourceType, TargetType> addAdHocMapping(Getter<SourceType, DataType> getter, Setter<TargetType, DataType> setter);
+	
+	<DataType> Mapper<SourceType, TargetType> addAdHocMapping(DataType value, Setter<TargetType, DataType> setter);
+	
+	<DataType> Mapper<SourceType, TargetType> addAdHocMapping(Supplier<DataType> supplier, Setter<TargetType, DataType> setter);
 }

@@ -114,9 +114,23 @@ public class ManipulatorBuilder<SourceType, TargetType> {
 			return processCollection(getter, setter, HashSet::new);
 		} else if (Enum.class.isAssignableFrom(sourceClass) && Enum.class.isAssignableFrom(targetClass)) {
 			return processEnum(getter, setter, (Class<Enum>) sourceClass, (Class<Enum>) targetClass);
+		} else if(isMappable(sourceClass) && isMappable(targetClass)){
+			return getMapperManipulator(getter, setter, sourceClass, targetClass);			
 		} else {
-			return getMapperManipulator(getter, setter, sourceClass, targetClass);
+			return null;
 		}
+	}
+
+	protected static <DataType> boolean isMappable(Class<DataType> clazz) {
+		if(clazz.isPrimitive()){
+			return false;
+		}
+		Package package1 = clazz.getPackage();
+		Package javaLangPackage = Package.getPackage("java.lang");
+		if(javaLangPackage.equals(package1)){
+			return false;
+		}
+		return true;
 	}
 
 	private <SourceDataType extends Enum<SourceDataType>, TargetDataType extends Enum<TargetDataType>> Manipulator<SourceType, TargetType> processEnum(

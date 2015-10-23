@@ -8,8 +8,10 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import cz.rpridal.j8mapper.ClassDefinition;
+import cz.rpridal.j8mapper.getter.Getter;
 import cz.rpridal.j8mapper.manipulator.ClassSupplier;
 import cz.rpridal.j8mapper.manipulator.ObjectCache;
+import cz.rpridal.j8mapper.setter.Setter;
 
 public abstract class AbstractMapper<SourceType, TargetType> implements Mapper<SourceType, TargetType> {
 
@@ -102,4 +104,28 @@ public abstract class AbstractMapper<SourceType, TargetType> implements Mapper<S
 	@Override
 	public abstract TargetType map(SourceType source, TargetType target);
 
+	@Override
+	public <DataType> Mapper<SourceType, TargetType> addAdHocMapping(final DataType value,
+			Setter<TargetType, DataType> setter) {
+		Getter<SourceType, DataType> getter = s -> value;
+		return this.addAdHocMapping(getter, setter);
+	}
+	
+	@Override
+	public <DataType> Mapper<SourceType, TargetType> addAdHocMapping(final Supplier<DataType> supplier,
+			Setter<TargetType, DataType> setter) {
+		Getter<SourceType, DataType> getter = s -> supplier.get();
+		return addAdHocMapping(getter, setter);
+	}
+
+	@Override
+	public <DataType> Mapper<SourceType, TargetType> addAdHocMapping(Getter<SourceType, DataType> getter,
+			Setter<TargetType, DataType> setter) {
+		CompositeMapper<SourceType, TargetType> compositeMapper = new CompositeMapper<>(classDefinition);
+		compositeMapper.registrateMapper(this);
+		LambdaMapper<SourceType, TargetType> lambdaMapper = new LambdaMapper<>(classDefinition);
+		lambdaMapper.registerMapping(getter, setter);
+		compositeMapper.registrateMapper(lambdaMapper);
+		return compositeMapper;
+	}
 }

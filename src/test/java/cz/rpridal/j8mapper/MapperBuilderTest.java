@@ -236,6 +236,98 @@ public class MapperBuilderTest {
 	}
 
 	@Test
+	public void adHocMappingWithRewriting() {
+		Source s = new Source();
+		s.setI(55);
+		s.setS("text");
+		s.setLs(Arrays.asList("S1", "S2"));
+		Mapper<Source, SameTarget> mapper = MapperBuilder.start(Source.class, SameTarget.class).excludeField("bi").automatic().build();
+		
+		SameTarget target = mapper.addAdHocMapping(15, SameTarget::setI).map(s, SameTarget::new);
+
+		assertEquals("text", target.getS());
+		assertEquals(15, target.getI());
+		assertTrue(contains(target.getLs(), a -> a.equals("S1")));
+		assertTrue(contains(target.getLs(), a -> a.equals("S2")));
+	}
+	
+	public static class SmallBoolean{
+		private boolean a;
+		
+		public boolean isA() {
+			return a;
+		}
+		
+		public void setA(boolean a) {
+			this.a = a;
+		}
+	}
+	
+	public static class BigBoolean{
+		private Boolean a;
+		public Boolean getA() {
+			return a;
+		}
+		public void setA(Boolean a) {
+			this.a = a;
+		}
+	}
+	
+	@Test
+	public void smallBooleanToBigBoolean() {
+		SmallBoolean source = new SmallBoolean();
+		source.setA(true);
+		Mapper<SmallBoolean, BigBoolean> mapper = MapperBuilder.autoBuild(SmallBoolean.class, BigBoolean.class);
+		BigBoolean target = mapper.map(source);
+		assertTrue(target.getA());
+	}
+	
+	@Test
+	public void bigBooleanToSmallBoolean() {
+		BigBoolean source = new BigBoolean();
+		source.setA(true);
+		Mapper<BigBoolean, SmallBoolean> mapper = MapperBuilder.autoBuild(BigBoolean.class, SmallBoolean.class);
+		SmallBoolean target = mapper.map(source);
+		assertTrue(target.isA());
+	}
+	
+	public static class StringClass{
+		private String a;
+		
+		public String getA() {
+			return a;
+		}
+		
+		public void setA(String a) {
+			this.a = a;
+		}
+	}
+	
+	public static class ObjectClass{
+		private StringClass a;
+		
+		public StringClass getA() {
+			return a;
+		}
+		
+		public void setA(StringClass a) {
+			this.a = a;
+		}
+	}
+	
+	@Test
+	public void automaticWrongTyping() {
+		StringClass source = new StringClass();
+		source.setA("test");
+		Mapper<StringClass, ObjectClass> mapper = MapperBuilder.autoBuild(StringClass.class, ObjectClass.class);
+		
+		ObjectClass target = mapper.map(source);
+		
+		assertNull(target.getA());
+	}
+	
+
+	@Test
 	public void automaticMappingSimpleObjectBuilderSet() {
 		Source s = new Source();
 		s.setI(55);

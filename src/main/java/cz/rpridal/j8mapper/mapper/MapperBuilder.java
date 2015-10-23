@@ -2,6 +2,7 @@ package cz.rpridal.j8mapper.mapper;
 
 import java.util.HashSet;
 import java.util.Set;
+import java.util.function.Supplier;
 import java.util.logging.Logger;
 
 import cz.rpridal.j8mapper.ClassDefinition;
@@ -86,6 +87,13 @@ public class MapperBuilder<SourceType, TargetType> {
 		registerMapping(getter, setter);
 		return this;
 	}
+	
+	public <DataType> MapperBuilder<SourceType, TargetType> addMapping(Supplier<DataType> supplier,
+			Setter<TargetType, DataType> setter) {
+		Getter<SourceType, DataType> getter = s -> supplier.get();
+		registerMapping(getter , setter);
+		return this;
+	}
 
 	/**
 	 * Add mapping for one field input to {@link Setter} and output from
@@ -140,13 +148,14 @@ public class MapperBuilder<SourceType, TargetType> {
 		registerMapping(s -> data, setter);
 		return this;
 	}
-
+	
 	private <SourceDataType, TargetDataType> void registerMapping(Getter<SourceType, SourceDataType> getter,
 			Setter<TargetType, TargetDataType> setter, Transformer<SourceDataType, TargetDataType> transformer) {
 		lambdaMapper.registerMapping(getter, setter, transformer);
 	}
 
-	private <Data> void registerMapping(Getter<SourceType, Data> getter, Setter<TargetType, Data> setter) {
+	private <DataType> void registerMapping(Getter<SourceType, DataType> getter, Setter<TargetType, DataType> setter) {
 		lambdaMapper.registerMapping(getter, setter);
 	}
+
 }
