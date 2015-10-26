@@ -2,9 +2,12 @@ package cz.rpridal.j8mapper.transformer;
 
 import java.util.Arrays;
 import java.util.Optional;
+import java.util.logging.Logger;
 
 public class EnumTransformer<SourceData extends Enum<SourceData>, TargetData extends Enum<TargetData>>
 		implements Transformer<SourceData, TargetData> {
+
+	private static final Logger LOGGER = Logger.getLogger(EnumTransformer.class.getName());
 
 	private final Class<SourceData> sourceClass;
 	private final Class<TargetData> targetClass;
@@ -25,6 +28,7 @@ public class EnumTransformer<SourceData extends Enum<SourceData>, TargetData ext
 		if (findFirst.isPresent()) {
 			return findFirst.get();
 		}
+		LOGGER.severe("Can't find '" + textData + "' in target enum '" + targetClass.getName() + "'");
 		return null;
 	}
 }

@@ -20,9 +20,11 @@ import cz.rpridal.j8mapper.mapper.Mapper;
 import cz.rpridal.j8mapper.mapper.MapperBuilder;
 import cz.rpridal.j8mapper.mapper.MapperStorage;
 import cz.rpridal.j8mapper.setter.MethodSetter;
+import cz.rpridal.j8mapper.transformer.EnumToStringTransformer;
 import cz.rpridal.j8mapper.transformer.EnumTransformer;
 import cz.rpridal.j8mapper.transformer.IdentityTransformer;
 import cz.rpridal.j8mapper.transformer.MapperTransformer;
+import cz.rpridal.j8mapper.transformer.StringToEnumTransformer;
 import cz.rpridal.j8mapper.transformer.Transformer;
 
 public class ManipulatorBuilder<SourceType, TargetType> {
@@ -114,20 +116,36 @@ public class ManipulatorBuilder<SourceType, TargetType> {
 			return processCollection(getter, setter, HashSet::new);
 		} else if (Enum.class.isAssignableFrom(sourceClass) && Enum.class.isAssignableFrom(targetClass)) {
 			return processEnum(getter, setter, (Class<Enum>) sourceClass, (Class<Enum>) targetClass);
-		} else if(isMappable(sourceClass) && isMappable(targetClass)){
-			return getMapperManipulator(getter, setter, sourceClass, targetClass);			
+		} else if (Enum.class.isAssignableFrom(sourceClass) && String.class.isAssignableFrom(targetClass)) {
+			return processEnumToString(getter, setter, (Class<Enum>) sourceClass);
+		} else if (String.class.isAssignableFrom(sourceClass) && Enum.class.isAssignableFrom(targetClass)) {
+			return processStringToEnum(getter, setter, (Class<Enum>) targetClass);
+		} else if (isMappable(sourceClass) && isMappable(targetClass)) {
+			return getMapperManipulator(getter, setter, sourceClass, targetClass);
 		} else {
 			return null;
 		}
 	}
 
+	private <SourceDataType extends Enum<SourceDataType>> Manipulator<SourceType, TargetType> processEnumToString(
+			Method getter, Method setter, Class<SourceDataType> sourceClass) {
+		return new TransformerManipulator<SourceType, TargetType, SourceDataType, String>(new MethodGetter<>(getter),
+				new MethodSetter<>(setter), new EnumToStringTransformer<SourceDataType>(sourceClass));
+	}
+
+	private <TargetDataType extends Enum<TargetDataType>> Manipulator<SourceType, TargetType> processStringToEnum(
+			Method getter, Method setter, Class<TargetDataType> targetClass) {
+		return new TransformerManipulator<SourceType, TargetType, String, TargetDataType>(new MethodGetter<>(getter),
+				new MethodSetter<>(setter), new StringToEnumTransformer<TargetDataType>(targetClass));
+	}
+
 	protected static <DataType> boolean isMappable(Class<DataType> clazz) {
-		if(clazz.isPrimitive()){
+		if (clazz.isPrimitive()) {
 			return false;
 		}
 		Package package1 = clazz.getPackage();
 		Package javaLangPackage = Package.getPackage("java.lang");
-		if(javaLangPackage.equals(package1)){
+		if (javaLangPackage.equals(package1)) {
 			return false;
 		}
 		return true;

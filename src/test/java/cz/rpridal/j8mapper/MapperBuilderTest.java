@@ -686,6 +686,86 @@ public class MapperBuilderTest {
 
 		assertEquals(50, result.getAge().intValue());
 	}
+	
+	public static enum SourceEnum{
+		E1, E2, E3
+	}
+	public static enum TargetEnum{
+		E1, E2
+	}
+	
+	public static class SourceEnumBox{
+		private SourceEnum e;
+		public SourceEnum getE() {
+			return e;
+		}
+		public void setE(SourceEnum e) {
+			this.e = e;
+		}
+	}
+	public static class TargetEnumBox{
+		private TargetEnum e;
+		public TargetEnum getE() {
+			return e;
+		}
+		public void setE(TargetEnum e) {
+			this.e = e;
+		}
+	}
+	
+	@Test
+	public void wrongEnumMapping() {
+		SourceEnumBox source = new SourceEnumBox();
+		source.setE(SourceEnum.E3);
+
+		TargetEnumBox target = MapperBuilder
+				.start(SourceEnumBox.class, TargetEnumBox.class).automatic().build().map(source);
+
+		assertNull(target.getE());
+	}
+	
+	public static class StringBox{
+		private String e;
+		public String getE() {
+			return e;
+		}
+		public void setE(String e) {
+			this.e = e;
+		}
+	}
+	
+	@Test
+	public void enumToStringMapping() {
+		SourceEnumBox source = new SourceEnumBox();
+		source.setE(SourceEnum.E3);
+
+		StringBox target = MapperBuilder
+				.start(SourceEnumBox.class, StringBox.class).automatic().build().map(source);
+
+		assertEquals("E3", target.getE());
+	}
+	
+	@Test
+	public void stringToEnumMapping() {
+		StringBox source = new StringBox();
+		source.setE("E2");
+
+		SourceEnumBox target = MapperBuilder
+				.start(StringBox.class, SourceEnumBox.class).automatic().build().map(source);
+
+		assertEquals(SourceEnum.E2, target.getE());
+	}
+	
+	@Test
+	public void wrongStringToEnumMapping() {
+		StringBox source = new StringBox();
+		source.setE("E4");
+
+		SourceEnumBox target = MapperBuilder
+				.start(StringBox.class, SourceEnumBox.class).automatic().build().map(source);
+
+		assertNull(target.getE());
+	}
 
 	@Test
 	public void excludeTest() {
