@@ -1,11 +1,15 @@
 package cz.rpridal.j8mapper.manipulator;
 
+import java.util.logging.Logger;
+
 import cz.rpridal.j8mapper.getter.Getter;
 import cz.rpridal.j8mapper.setter.Setter;
 import cz.rpridal.j8mapper.transformer.Transformer;
 
 public class TransformerManipulator<SourceType, TargetType, SourceDataType, TargetDataType>
 		implements Manipulator<SourceType, TargetType> {
+	
+	private static final Logger LOGGER = Logger.getLogger(TransformerManipulator.class.getName());
 
 	private final Getter<SourceType, SourceDataType> getter;
 	private final Setter<TargetType, TargetDataType> setter;
@@ -27,7 +31,13 @@ public class TransformerManipulator<SourceType, TargetType, SourceDataType, Targ
 		if (source == null) {
 			return;
 		}
-		SourceDataType data = getter.get(source);
+		SourceDataType data = null;			
+		try {
+			data = getter.get(source);
+		} catch (Exception e) {
+			LOGGER.severe("Getter '" + getter.getClass().getName() + "' on object '"+source.getClass().getName()+"' throw null pointer exeption ");
+			return;
+		}
 		if (data == null) {
 			return;
 		}

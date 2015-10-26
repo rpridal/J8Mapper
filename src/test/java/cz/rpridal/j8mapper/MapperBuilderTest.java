@@ -214,8 +214,8 @@ public class MapperBuilderTest {
 	@Test
 	public void automaticMappingSimpleObjectBuilderNull() {
 		Source s = null;
-		SameTarget target = MapperBuilder.start(Source.class, SameTarget.class).excludeField("bi").automatic().build().map(s,
-				SameTarget::new);
+		SameTarget target = MapperBuilder.start(Source.class, SameTarget.class).excludeField("bi").automatic().build()
+				.map(s, SameTarget::new);
 
 		assertNull(target);
 	}
@@ -226,8 +226,8 @@ public class MapperBuilderTest {
 		s.setI(55);
 		s.setS("text");
 		s.setLs(Arrays.asList("S1", "S2"));
-		SameTarget target = MapperBuilder.start(Source.class, SameTarget.class).excludeField("bi").automatic().build().map(s,
-				SameTarget::new);
+		SameTarget target = MapperBuilder.start(Source.class, SameTarget.class).excludeField("bi").automatic().build()
+				.map(s, SameTarget::new);
 
 		assertEquals("text", target.getS());
 		assertEquals(55, target.getI());
@@ -241,8 +241,9 @@ public class MapperBuilderTest {
 		s.setI(55);
 		s.setS("text");
 		s.setLs(Arrays.asList("S1", "S2"));
-		Mapper<Source, SameTarget> mapper = MapperBuilder.start(Source.class, SameTarget.class).excludeField("bi").automatic().build();
-		
+		Mapper<Source, SameTarget> mapper = MapperBuilder.start(Source.class, SameTarget.class).excludeField("bi")
+				.automatic().build();
+
 		SameTarget target = mapper.addAdHocMapping(15, SameTarget::setI).map(s, SameTarget::new);
 
 		assertEquals("text", target.getS());
@@ -250,29 +251,31 @@ public class MapperBuilderTest {
 		assertTrue(contains(target.getLs(), a -> a.equals("S1")));
 		assertTrue(contains(target.getLs(), a -> a.equals("S2")));
 	}
-	
-	public static class SmallBoolean{
+
+	public static class SmallBoolean {
 		private boolean a;
-		
+
 		public boolean isA() {
 			return a;
 		}
-		
+
 		public void setA(boolean a) {
 			this.a = a;
 		}
 	}
-	
-	public static class BigBoolean{
+
+	public static class BigBoolean {
 		private Boolean a;
+
 		public Boolean getA() {
 			return a;
 		}
+
 		public void setA(Boolean a) {
 			this.a = a;
 		}
 	}
-	
+
 	@Test
 	public void smallBooleanToBigBoolean() {
 		SmallBoolean source = new SmallBoolean();
@@ -281,7 +284,7 @@ public class MapperBuilderTest {
 		BigBoolean target = mapper.map(source);
 		assertTrue(target.getA());
 	}
-	
+
 	@Test
 	public void bigBooleanToSmallBoolean() {
 		BigBoolean source = new BigBoolean();
@@ -290,42 +293,41 @@ public class MapperBuilderTest {
 		SmallBoolean target = mapper.map(source);
 		assertTrue(target.isA());
 	}
-	
-	public static class StringClass{
+
+	public static class StringClass {
 		private String a;
-		
+
 		public String getA() {
 			return a;
 		}
-		
+
 		public void setA(String a) {
 			this.a = a;
 		}
 	}
-	
-	public static class ObjectClass{
+
+	public static class ObjectClass {
 		private StringClass a;
-		
+
 		public StringClass getA() {
 			return a;
 		}
-		
+
 		public void setA(StringClass a) {
 			this.a = a;
 		}
 	}
-	
+
 	@Test
 	public void automaticWrongTyping() {
 		StringClass source = new StringClass();
 		source.setA("test");
 		Mapper<StringClass, ObjectClass> mapper = MapperBuilder.autoBuild(StringClass.class, ObjectClass.class);
-		
+
 		ObjectClass target = mapper.map(source);
-		
+
 		assertNull(target.getA());
 	}
-	
 
 	@Test
 	public void automaticMappingSimpleObjectBuilderSet() {
@@ -333,8 +335,8 @@ public class MapperBuilderTest {
 		s.setI(55);
 		s.setS("text");
 		s.setSs(Arrays.asList("S1", "S2"));
-		SameTarget target = MapperBuilder.start(Source.class, SameTarget.class).excludeField("bi").automatic().build().map(s,
-				SameTarget::new);
+		SameTarget target = MapperBuilder.start(Source.class, SameTarget.class).excludeField("bi").automatic().build()
+				.map(s, SameTarget::new);
 
 		assertEquals("text", target.getS());
 		assertEquals(55, target.getI());
@@ -657,6 +659,30 @@ public class MapperBuilderTest {
 		personS.setAge(50);
 
 		PersonT result = MapperBuilder.start(PersonS.class, PersonT.class).automatic().build().map(personS);
+
+		assertEquals(50, result.getAge().intValue());
+	}
+
+	@Test
+	public void catchningNullPointerExceptionSupplier() {
+		PersonS personS = new PersonS();
+		personS.setAge(50);
+
+		PersonT result = MapperBuilder.start(PersonS.class, PersonT.class).automatic().addMapping(() -> {
+			throw new NullPointerException("Testing null pointer exception");
+		} , PersonT::setName).build().map(personS);
+
+		assertEquals(50, result.getAge().intValue());
+	}
+
+	@Test
+	public void catchningNullPointerExceptionGetter() {
+		PersonS personS = new PersonS();
+		personS.setAge(50);
+
+		PersonT result = MapperBuilder.start(PersonS.class, PersonT.class).automatic().addMapping((a) -> {
+			throw new NullPointerException("Testing null pointer exception");
+		} , PersonT::setName).build().map(personS);
 
 		assertEquals(50, result.getAge().intValue());
 	}
