@@ -110,7 +110,7 @@ public abstract class AbstractMapper<SourceType, TargetType> implements Mapper<S
 		Getter<SourceType, DataType> getter = s -> value;
 		return this.addAdHocMapping(getter, setter);
 	}
-	
+
 	@Override
 	public <DataType> Mapper<SourceType, TargetType> addAdHocMapping(final Supplier<DataType> supplier,
 			Setter<TargetType, DataType> setter) {

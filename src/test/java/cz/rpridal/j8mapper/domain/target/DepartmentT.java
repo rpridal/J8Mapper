@@ -5,8 +5,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
-import cz.rpridal.j8mapper.domain.source.EmployeeS;
-
 public class DepartmentT {
 	private String name;
 	private List<EmployeeT> employees = new LinkedList<>();

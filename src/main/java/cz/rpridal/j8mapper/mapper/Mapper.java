@@ -54,9 +54,11 @@ public interface Mapper<SourceType, TargetType> {
 
 	List<TargetType> mapToList(Collection<? extends SourceType> source);
 
-	<DataType> Mapper<SourceType, TargetType> addAdHocMapping(Getter<SourceType, DataType> getter, Setter<TargetType, DataType> setter);
-	
+	<DataType> Mapper<SourceType, TargetType> addAdHocMapping(Getter<SourceType, DataType> getter,
+			Setter<TargetType, DataType> setter);
+
 	<DataType> Mapper<SourceType, TargetType> addAdHocMapping(DataType value, Setter<TargetType, DataType> setter);
-	
-	<DataType> Mapper<SourceType, TargetType> addAdHocMapping(Supplier<DataType> supplier, Setter<TargetType, DataType> setter);
+
+	<DataType> Mapper<SourceType, TargetType> addAdHocMapping(Supplier<DataType> supplier,
+			Setter<TargetType, DataType> setter);
 }

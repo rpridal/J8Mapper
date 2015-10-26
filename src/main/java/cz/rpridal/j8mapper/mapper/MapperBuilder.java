@@ -87,11 +87,11 @@ public class MapperBuilder<SourceType, TargetType> {
 		registerMapping(getter, setter);
 		return this;
 	}
-	
+
 	public <DataType> MapperBuilder<SourceType, TargetType> addMapping(Supplier<DataType> supplier,
 			Setter<TargetType, DataType> setter) {
 		Getter<SourceType, DataType> getter = s -> supplier.get();
-		registerMapping(getter , setter);
+		registerMapping(getter, setter);
 		return this;
 	}
 
@@ -148,7 +148,7 @@ public class MapperBuilder<SourceType, TargetType> {
 		registerMapping(s -> data, setter);
 		return this;
 	}
-	
+
 	private <SourceDataType, TargetDataType> void registerMapping(Getter<SourceType, SourceDataType> getter,
 			Setter<TargetType, TargetDataType> setter, Transformer<SourceDataType, TargetDataType> transformer) {
 		lambdaMapper.registerMapping(getter, setter, transformer);
